@@ -1,4 +1,5 @@
 import pygame as pg
+from settings import *
 from time import perf_counter
 
 start_time = perf_counter()
@@ -6,24 +7,24 @@ start_time = perf_counter()
 pg.display.init()
 pg.font.init()
 
-WIDTH = 900
-HEIGHT = 600
-FPS = 60
-dt = 0
-
 display_flags = pg.HWSURFACE | pg.DOUBLEBUF
 screen = pg.display.set_mode((WIDTH, HEIGHT), display_flags)
 clock = pg.time.Clock()
 pg.display.set_caption('ЫЫЫЫЫЫЫЪ')
 
+dt = 0
+
+sprites = pg.sprite.Group()
+walls = pg.sprite.Group()
+
 # TODO: ...
 
 class Player(pg.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, x, y):
         super().__init__()
         self.image = pg.Surface((50, 50))
         self.image.fill((150, 255, 150))
-        self.rect = self.image.get_rect(center=(WIDTH//2, HEIGHT//2))
+        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
         self.speed = 300
         self.vector = pg.math.Vector2(0, 0)
         self.pos = pg.math.Vector2(self.rect.center)
@@ -50,9 +51,23 @@ class Player(pg.sprite.Sprite):
         self.get_input()
         self.move(dt)
 
-sprites = pg.sprite.Group()
-player = Player()
-sprites.add(player)
+class Wall(pg.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
+        self.image.fill((100, 100, 100))
+        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
+
+for y, row in enumerate(WORLD_MAP):
+    for x, tile in enumerate(row):
+        if tile == 'W':
+            wall = Wall(x, y)
+            walls.add(wall)
+            sprites.add(wall)
+        elif tile == 'P':
+            player = Player(x, y)
+            sprites.add(player)
+
 running = True
 first_frame = True
 while running:
