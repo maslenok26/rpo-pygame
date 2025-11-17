@@ -1,20 +1,54 @@
 import pygame as pg
-from time import perf_counter
-from game.settings import WIDTH, HEIGHT, WORLD_MAP
+from game.settings import *
 from game.classes import *
-
-start_time = perf_counter()
 
 pg.display.init()
 pg.font.init()
 
 display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
-screen = pg.display.set_mode((WIDTH, HEIGHT), flags=display_flags, vsync=1)
+screen = pg.display.set_mode((FIRST_SCREEN_WIDTH, FIRST_SCREEN_HEIGHT), flags=display_flags, vsync=1)
+game_surface = pg.Surface((GAME_WIDTH, GAME_HEIGHT))
 clock = pg.time.Clock()
-pg.display.set_caption('ЫЫЫЫЫЫЫЪ')
 
 sprites = pg.sprite.Group()
 walls = pg.sprite.Group()
+
+def transform_surface(surface):
+    cur_size = screen.get_size()
+    scale_x = cur_size[0] / GAME_WIDTH
+    scale_y = cur_size[1] / GAME_HEIGHT
+    scale = min(scale_x, scale_y)
+    scaled_width = GAME_WIDTH * scale
+    scaled_height = GAME_HEIGHT * scale
+    scaled_surface = pg.transform.scale(surface, (scaled_width, scaled_height))
+    offset_x = (cur_size[0] - scaled_width) / 2
+    offset_y = (cur_size[1] - scaled_height) / 2
+    return scaled_surface, (offset_x, offset_y)
+
+def mainloop():
+    running = True
+    while running:
+        dt = clock.tick() / 1000
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                running = False
+
+        sprites.update(dt, walls)
+        game_surface.fill((0, 0, 0))
+
+        camera.update(player)
+        for sprite in sprites:
+            game_surface.blit(sprite.image, camera.adjust(sprite))
+
+        scaled_surface, offset = transform_surface(game_surface)
+        screen.fill((0, 0, 0))
+        screen.blit(scaled_surface, offset)
+
+        player.check_dash()
+
+        pg.display.flip()
+    pg.quit()
 
 for y, row in enumerate(WORLD_MAP):
     for x, tile in enumerate(row[::2]):
@@ -25,24 +59,6 @@ for y, row in enumerate(WORLD_MAP):
         elif tile == 'P':
             player = Player(x, y)
             sprites.add(player)
+camera = Camera()
 
-running = True
-first_frame = True
-while running:
-    dt = clock.tick() / 1000
-    print(1/dt)
-
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            running = False
-    if first_frame:
-        total_startup_time = perf_counter() - start_time
-        print(f"Время запуска: {total_startup_time:.3f} сек")
-        first_frame = False
-
-    sprites.update(dt, walls)
-    screen.fill((0, 0, 0))
-    sprites.draw(screen)
-
-    pg.display.flip()
-pg.quit()
+mainloop()
