@@ -1,7 +1,7 @@
 import pygame as pg
 from math import copysign
-from .settings import *
-from .utils import scale_image
+from ..settings import TILE_SIZE, SUB_STEP
+from ..utils import scale_image
 
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y, groups):
@@ -87,28 +87,3 @@ class Player(pg.sprite.Sprite):
         self.get_input()
         self.move(dt, collidables)
         self.check_dash()
-
-
-class Wall(pg.sprite.Sprite):
-    def __init__(self, x, y, groups):
-        super().__init__(groups)
-        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((100, 100, 100))
-        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
-
-
-class Camera:
-    def __init__(self):
-        self.pos = pg.Vector2(0, 0)
-        self.rect = pg.Rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
-        self.lerp_speed = 12
-
-    def adjust(self, sprite_rect: pg.Rect):
-        return sprite_rect.move(-self.rect.x, -self.rect.y)
-    
-    def update(self, target: Player, dt):
-        lerp_value = min(self.lerp_speed * dt, 1)
-        self.pos = self.pos.lerp(target.pos, lerp_value)
-        dist = target.pos - self.pos
-        self.rect.centerx = target.rect.centerx - round(dist.x)
-        self.rect.centery = target.rect.centery - round(dist.y)

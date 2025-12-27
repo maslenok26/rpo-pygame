@@ -7,7 +7,7 @@ def scale_image(path, size):
     return pg.transform.scale(image, size)
 
 def get_scale(width, height):
-    scale_x, scale_y = width // GAME_WIDTH, height // GAME_HEIGHT
+    scale_x, scale_y = width / GAME_WIDTH, height / GAME_HEIGHT
     return max(scale_x, scale_y)
 
 def scale_surface(root: pg.Surface, surface):

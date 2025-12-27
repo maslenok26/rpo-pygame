@@ -16,7 +16,7 @@ FPS = 60
 SUB_STEP = 1
 
 # ТЕСТОВАЯ КАРТА
-WORLD_MAP = [
+TEST_MAP = [
     'W W W W W W W W W W W W W W W W W W W W',
     '. . . . . . . . . . . . . . . . . . . W',
     '. . . . . . . . . . . . . . . . . . . W',
