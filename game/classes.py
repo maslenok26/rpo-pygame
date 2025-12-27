@@ -1,17 +1,18 @@
 import pygame as pg
+from math import copysign
 from .settings import *
-from .utils import transform_image
+from .utils import scale_image
 
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y, groups):
         super().__init__(groups)
-        self.image = transform_image('vanya.jpg', (TILE_SIZE*1.5, TILE_SIZE*1.5))
+        self.image = scale_image('vanya.jpg', (TILE_SIZE*1.3, TILE_SIZE*1.3))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
         self.pos = pg.Vector2(self.rect.center)
-        self.x_rem = 0
-        self.y_rem = 0
+        self.rem_x = 0
+        self.rem_y = 0
         self.vector = pg.Vector2(0, 0)
-        self.base_speed = TILE_SIZE * 9
+        self.base_speed = TILE_SIZE * 10
         self.speed = self.base_speed
         self.is_dashing = False
         self.dash_speed = self.base_speed * 2.5
@@ -20,9 +21,8 @@ class Player(pg.sprite.Sprite):
         self.last_dash_time = -self.dash_cooldown
 
     def get_input(self):
-        if self.is_dashing:
-            return
-        self.vector.x, self.vector.y = 0, 0
+        if self.is_dashing: return
+        self.vector *= 0
         keys = pg.key.get_pressed()
         if keys[pg.K_w]: self.vector.y -= 1
         if keys[pg.K_a]: self.vector.x -= 1
@@ -32,61 +32,61 @@ class Player(pg.sprite.Sprite):
             self.vector = self.vector.normalize()
             if keys[pg.K_SPACE]: self.dash()
 
-    def _make_a_step(self, axis, step, move, moved, collidables):
+    def _make_a_step(self, axis, step, steps_to_do, steps_done, collidables):
         if axis == 'x': self.rect.x += step
         elif axis == 'y': self.rect.y += step
         if not pg.sprite.spritecollide(self, collidables, False):
-            moved += step
-            move -= step
+            steps_done += step
+            steps_to_do -= step
         else:
             if axis == 'x':
                 self.rect.x -= step
-                self.x_rem = 0
+                self.rem_x = 0
             elif axis == 'y':
                 self.rect.y -= step
-                self.y_rem = 0
-            move = 0
-        return move, moved
+                self.rem_y = 0
+            steps_to_do = 0
+        return steps_to_do, steps_done
 
     def move(self, dt, collidables):
-        delta_x = self.vector.x * self.speed * dt
-        delta_y = self.vector.y * self.speed * dt
-        self.x_rem += delta_x
-        self.y_rem += delta_y
-        moved_x = 0
-        moved_y = 0
-        move_x = int(self.x_rem)
-        move_y = int(self.y_rem)
-        step_x = SUB_STEP if move_x > 0 else -SUB_STEP
-        step_y = SUB_STEP if move_y > 0 else -SUB_STEP
-        while move_x or move_y:
-            if move_x: move_x, moved_x = self._make_a_step('x', step_x, move_x, moved_x, collidables)
-            if move_y: move_y, moved_y = self._make_a_step('y', step_y, move_y, moved_y, collidables)
-        self.x_rem -= moved_x
-        self.y_rem -= moved_y
-        self.pos.x = self.rect.centerx + self.x_rem
-        self.pos.y = self.rect.centery + self.y_rem
-
+        self.rem_x += self.vector.x * self.speed * dt
+        self.rem_y += self.vector.y * self.speed * dt
+        steps_to_do_x = round(self.rem_x)
+        steps_to_do_y = round(self.rem_y)
+        steps_done_x = 0
+        steps_done_y = 0
+        step_x = copysign(SUB_STEP, steps_to_do_x)
+        step_y = copysign(SUB_STEP, steps_to_do_y)
+        while steps_to_do_x or steps_to_do_y:
+            if steps_to_do_x: steps_to_do_x, steps_done_x = self._make_a_step(
+                'x', step_x, steps_to_do_x, steps_done_x, collidables
+                )
+            if steps_to_do_y: steps_to_do_y, steps_done_y = self._make_a_step(
+                'y', step_y, steps_to_do_y, steps_done_y, collidables
+                )
+        self.rem_x -= steps_done_x
+        self.rem_y -= steps_done_y
+        self.pos.x = self.rect.centerx + self.rem_x
+        self.pos.y = self.rect.centery + self.rem_y
+        
     def dash(self):
         cur_time = pg.time.get_ticks()
-        if cur_time - self.last_dash_time <= self.dash_cooldown:
-            return
+        if cur_time - self.last_dash_time <= self.dash_cooldown: return
         self.speed = self.dash_speed
         self.is_dashing = True
         self.last_dash_time = cur_time
 
     def check_dash(self):
-        if not self.is_dashing:
-            return
+        if not self.is_dashing: return
         cur_time = pg.time.get_ticks()
-        if cur_time - self.last_dash_time < self.dash_duration:
-            return
+        if cur_time - self.last_dash_time < self.dash_duration: return
         self.speed = self.base_speed
         self.is_dashing = False
 
     def update(self, dt, collidables):
         self.get_input()
         self.move(dt, collidables)
+        self.check_dash()
 
 
 class Wall(pg.sprite.Sprite):
@@ -95,20 +95,20 @@ class Wall(pg.sprite.Sprite):
         self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
         self.image.fill((100, 100, 100))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
-        self.pos = pg.Vector2(self.rect.center)
 
 
 class Camera:
     def __init__(self):
-        self.pos = pg.math.Vector2(0, 0)
+        self.pos = pg.Vector2(0, 0)
         self.rect = pg.Rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
         self.lerp_speed = 12
 
-    def adjust(self, sprite):
-        return sprite.rect.move(-self.rect.x, -self.rect.y)
-
-    def update(self, target, dt):
-        lerp_value = self.lerp_speed * dt
-        if lerp_value > 1: lerp_value = 0
-        self.pos = self.pos.lerp(target.rect.center, lerp_value) * (1 + pow(10, -14))
-        self.rect.center = (int(self.pos.x), int(self.pos.y))
+    def adjust(self, sprite_rect: pg.Rect):
+        return sprite_rect.move(-self.rect.x, -self.rect.y)
+    
+    def update(self, target: Player, dt):
+        lerp_value = min(self.lerp_speed * dt, 1)
+        self.pos = self.pos.lerp(target.pos, lerp_value)
+        dist = target.pos - self.pos
+        self.rect.centerx = target.rect.centerx - round(dist.x)
+        self.rect.centery = target.rect.centery - round(dist.y)
