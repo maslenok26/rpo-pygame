@@ -27,14 +27,14 @@ class GameManager:
         self.groups = (self.all_sprites, self.collidables)
 
     def _init_camera(self):
-        self.camera = Camera()
+        self.camera = Camera(self.screen)
 
     def _init_level(self, level_map: list[str]=TEST_MAP):
         for group in self.groups:
             group.empty()
         tiles = {
             'W': (Wall, (self.all_sprites, self.collidables)),
-            'P': (Player, (self.all_sprites))
+            'P': (Player, self.all_sprites)
             # ...
         }
         for y, row in enumerate(level_map):
