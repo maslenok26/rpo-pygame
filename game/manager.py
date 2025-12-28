@@ -2,14 +2,20 @@ import pygame as pg
 from .settings import *
 from .classes import *
 from .utils import scale_surface
+from random import choice
+from os import listdir
 
 class GameManager:
     def __init__(self):
         self._init_display()
+        self._init_assets()
         self._init_clock()
         self._init_sprites()
         self._init_camera()
         self._init_level()
+
+    def get_fps(self):
+        return FPS if FPS_LOCK else 0
 
     def _init_display(self):
         display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
@@ -17,14 +23,21 @@ class GameManager:
             (START_SCREEN_WIDTH, START_SCREEN_HEIGHT), flags=display_flags, vsync=1
             )
         self.game_surf = pg.Surface((GAME_WIDTH, GAME_HEIGHT))
+        self.static_surf = pg.Surface((GAME_WIDTH, GAME_HEIGHT))
+
+    def _init_assets(self):
+        self.assets = {
+            'grass': tuple(pg.image.load(f'assets\\grass\\{sprite}').convert_alpha()
+            for sprite in listdir('assets\\grass'))
+        }
 
     def _init_clock(self):
         self.clock = pg.time.Clock()
     
     def _init_sprites(self):
         self.all_sprites: pg.sprite.Group[pg.sprite.Sprite] = pg.sprite.Group()
-        self.collidables: pg.sprite.Group[pg.sprite.Sprite] = pg.sprite.Group()
-        self.groups = (self.all_sprites, self.collidables)
+        self.collidable_sprites: pg.sprite.Group[pg.sprite.Sprite] = pg.sprite.Group()
+        self.groups = (self.all_sprites, self.collidable_sprites)
 
     def _init_camera(self):
         self.camera = Camera(self.screen)
@@ -32,31 +45,32 @@ class GameManager:
     def _init_level(self, level_map: list[str]=TEST_MAP):
         for group in self.groups:
             group.empty()
-        tiles = {
-            'W': (Wall, (self.all_sprites, self.collidables)),
+        dynamic_tiles = {
+            'W': (Wall, (self.all_sprites, self.collidable_sprites)),
             'P': (Player, self.all_sprites)
-            # ...
         }
         for y, row in enumerate(level_map):
             for x, tile in enumerate(row.split()):
-                if tile not in tiles: continue
-                ObjectClass, groups = tiles[tile]
+                self._draw_static_tile(choice(self.assets['grass']), x, y)
+                if tile not in dynamic_tiles: continue
+                ObjectClass, groups = dynamic_tiles[tile]
                 new_object = ObjectClass(x, y, groups)
                 if ObjectClass is Player:
                     self.player: Player = new_object
 
-    def get_fps(self):
-        return FPS if FPS_LOCK else 0
+    def _draw_static_tile(self, sprite, x, y):
+        self.static_surf.blit(sprite, (x*TILE_SIZE, y*TILE_SIZE))
     
-    def _draw(self):
+    def _draw_game_surface(self):
         self.game_surf.fill((0, 0, 0))
+        self.game_surf.blit(self.static_surf, self.camera.get_offset())
         for sprite in self.all_sprites:
             self.game_surf.blit(sprite.image, self.camera.adjust(sprite.rect))
-        scaled_surf, offset = scale_surface(self.screen, self.game_surf)
+        scaled_surf, scaling_offset = scale_surface(self.screen, self.game_surf)
         self.screen.fill((0, 0, 0))
-        self.screen.blit(scaled_surf, offset)
+        self.screen.blit(scaled_surf, scaling_offset)
     
     def update(self, dt):
-        self.player.update(self.collidables, dt)
-        self.camera.update(self.player, dt)
-        self._draw()
+        self.player.update(dt, self.collidable_sprites)
+        self.camera.update(dt, self.player)
+        self._draw_game_surface()

@@ -6,15 +6,15 @@ from ..utils import scale_image
 class Player(pg.sprite.Sprite):
     def __init__(self, x, y, groups):
         super().__init__(groups)
-        self.image = scale_image('vanya.jpg', (TILE_SIZE*1.3, TILE_SIZE*1.3))
+        self.image = scale_image('vanya.jpg', (14, 14))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
         self.pos = pg.Vector2(self.rect.center)
         self.rem = pg.Vector2(0, 0)
         self.vector = pg.Vector2(0, 0)
-        self.base_speed = TILE_SIZE * 10
+        self.base_speed = TILE_SIZE * 7
         self.speed = self.base_speed
         self.is_dashing = False
-        self.dash_speed = self.base_speed * 2.5
+        self.dash_speed = self.base_speed * 3
         self.dash_duration = 75
         self.dash_cooldown = 1000
         self.last_dash_time = -self.dash_cooldown
@@ -47,7 +47,7 @@ class Player(pg.sprite.Sprite):
             steps_to_do = 0
         return steps_to_do, steps_done
 
-    def move(self, collidables, dt):
+    def move(self, dt, collidables):
         self.rem += self.vector * self.speed * dt
         steps_to_do: pg.Vector2 = round(self.rem)
         steps_done = pg.Vector2(0, 0)
