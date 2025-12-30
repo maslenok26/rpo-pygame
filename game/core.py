@@ -15,6 +15,7 @@ def mainloop(gm: GameManager):
             if event.type == pg.QUIT:
                 running = False
         gm.update(dt)
+        gm.draw()
         pg.display.flip()
 
     pg.quit()

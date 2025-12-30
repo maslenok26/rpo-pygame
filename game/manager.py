@@ -30,7 +30,15 @@ class GameManager:
         mouse_pos = self.get_mouse_pos()
         self.camera.update(dt, self.player, mouse_pos)
         self.player.animate(mouse_pos, self.camera.target_dist.x)
-        self._draw_game_surface()
+
+    def draw(self):
+        self.game_surf.fill((0, 0, 0))
+        self.game_surf.blit(self.static_surf, self.camera.get_offset())
+        for sprite in self.all_sprites:
+            self.game_surf.blit(sprite.image, self.camera.adjust(sprite.rect))
+        scaled_surf, scaling_offset = scale_surface(self.screen, self.game_surf)
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(scaled_surf, scaling_offset)
 
     def _init_display(self):
         display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
@@ -77,12 +85,3 @@ class GameManager:
                 new_object = ObjectClass(x, y, groups)
                 if ObjectClass is Player:
                     self.player: Player = new_object
-    
-    def _draw_game_surface(self):
-        self.game_surf.fill((0, 0, 0))
-        self.game_surf.blit(self.static_surf, self.camera.get_offset())
-        for sprite in self.all_sprites:
-            self.game_surf.blit(sprite.image, self.camera.adjust(sprite.rect))
-        scaled_surf, scaling_offset = scale_surface(self.screen, self.game_surf)
-        self.screen.fill((0, 0, 0))
-        self.screen.blit(scaled_surf, scaling_offset)

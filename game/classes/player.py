@@ -2,6 +2,7 @@ from math import copysign
 
 import pygame as pg
 
+from .timer import Timer
 from ..settings import TILE_SIZE, SUB_STEP
 from ..utils import scale_image
 
@@ -13,8 +14,6 @@ class Player(pg.sprite.Sprite):
         self.base_speed = TILE_SIZE * 7
         self.speed = self.base_speed
         self.dash_speed = self.base_speed * 3
-        self.dash_duration = 75
-        self.dash_cooldown = 1000
 
         self.image = scale_image('vanya.jpg', (14, 14))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
@@ -23,21 +22,22 @@ class Player(pg.sprite.Sprite):
         self.vector = pg.Vector2(0, 0)
         self._rem = pg.Vector2(0, 0)
 
-        self.is_dashing = False
         self.flipped = False
-        self.last_dash_time = -self.dash_cooldown
+        self.timers = {'dash': Timer(
+            duration=75, end_func=self._stop_dash, cooldown=1000
+            )}
 
     def update(self, dt, collidables):
         self._get_input()
         self._move(dt, collidables)
-        self._check_dash()
+        self.timers['dash'].update()
 
     def animate(self, mouse_pos, camera_dist_x):
         # ...
         self._flip(mouse_pos, camera_dist_x)
 
     def _get_input(self):
-        if self.is_dashing: return
+        if self.timers['dash'].active: return
         self.vector *= 0
         keys = pg.key.get_pressed()
         if keys[pg.K_w]: self.vector.y -= 1
@@ -46,7 +46,7 @@ class Player(pg.sprite.Sprite):
         if keys[pg.K_d]: self.vector.x += 1
         if self.vector.length():
             self.vector = self.vector.normalize()
-            if keys[pg.K_SPACE]: self._dash()
+            if keys[pg.K_SPACE]: self._start_dash()
 
     def _move(self, dt, collidables):
         self._rem += self.vector * self.speed * dt
@@ -69,7 +69,7 @@ class Player(pg.sprite.Sprite):
     def _make_a_step(self, axis, step, steps_to_do, steps_done, collidables):
         if axis == 'x': self.rect.x += step
         elif axis == 'y': self.rect.y += step
-        if not pg.sprite.spritecollide(self, collidables, False):
+        if not pg.sprite.spritecollide(self, collidables, dokill=False):
             steps_done += step
             steps_to_do -= step
         else:
@@ -82,22 +82,17 @@ class Player(pg.sprite.Sprite):
             steps_to_do = 0
         return steps_to_do, steps_done
         
-    def _dash(self):
-        cur_time = pg.time.get_ticks()
-        if cur_time - self.last_dash_time <= self.dash_cooldown: return
-        self.speed = self.dash_speed
-        self.is_dashing = True
-        self.last_dash_time = cur_time
+    def _start_dash(self):
+        if self.timers['dash'].activate():
+            self.speed = self.dash_speed
 
-    def _check_dash(self):
-        if not self.is_dashing: return
-        cur_time = pg.time.get_ticks()
-        if cur_time - self.last_dash_time < self.dash_duration: return
+    def _stop_dash(self):
         self.speed = self.base_speed
-        self.is_dashing = False
 
     def _flip(self, mouse_pos: pg.Vector2, camera_dist_x):
         if (mouse_pos.x < camera_dist_x and not self.flipped
             or mouse_pos.x >= camera_dist_x and self.flipped):
-            self.image = pg.transform.flip(self.image, True, False)
+            self.image = pg.transform.flip(
+                self.image, flip_x=True, flip_y=False
+                )
             self.flipped = not self.flipped
