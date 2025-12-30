@@ -1,5 +1,7 @@
 import pygame as pg
+
 from .settings import GAME_WIDTH, GAME_HEIGHT
+
 
 def scale_image(path, size):
     image = pg.image.load(f'assets\\{path}').convert_alpha()

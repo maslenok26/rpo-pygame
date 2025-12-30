@@ -1,5 +1,7 @@
 import pygame as pg
+
 from ..settings import TILE_SIZE
+
 
 class Wall(pg.sprite.Sprite):
     def __init__(self, x, y, groups):

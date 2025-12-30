@@ -1,5 +1,7 @@
 import pygame as pg
+
 from .manager import GameManager
+
 
 def mainloop(gm: GameManager):
 
