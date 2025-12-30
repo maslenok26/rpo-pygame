@@ -7,6 +7,7 @@ class Player(pg.sprite.Sprite):
     def __init__(self, x, y, groups):
         super().__init__(groups)
         self.image = scale_image('vanya.jpg', (14, 14))
+        self.flipped = False
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
         self.pos = pg.Vector2(self.rect.center)
         self.rem = pg.Vector2(0, 0)
@@ -82,3 +83,13 @@ class Player(pg.sprite.Sprite):
         self.get_input()
         self.move(dt, collidables)
         self.check_dash()
+
+    def _flip(self, mouse_pos: pg.Vector2, camera_dist_x):
+        if mouse_pos.x < camera_dist_x and not self.flipped\
+        or mouse_pos.x >= camera_dist_x and self.flipped:
+            self.image = pg.transform.flip(self.image, True, False)
+            self.flipped = not self.flipped
+
+    def animate(self, mouse_pos, camera_dist_x):
+        # ...
+        self._flip(mouse_pos, camera_dist_x)

@@ -1,7 +1,7 @@
 import pygame as pg
 from .settings import *
 from .classes import *
-from .utils import scale_surface
+from .utils import get_scale, scale_surface
 from random import choice
 from os import listdir
 
@@ -13,9 +13,6 @@ class GameManager:
         self._init_sprites()
         self._init_camera()
         self._init_level()
-
-    def get_fps(self):
-        return FPS if FPS_LOCK else 0
 
     def _init_display(self):
         display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
@@ -72,5 +69,15 @@ class GameManager:
     
     def update(self, dt):
         self.player.update(dt, self.collidable_sprites)
-        self.camera.update(dt, self.player)
+        mouse_pos = self.get_mouse_pos()
+        self.camera.update(dt, self.player, mouse_pos)
+        self.player.animate(mouse_pos, self.camera.target_dist.x)
         self._draw_game_surface()
+
+    def get_fps(self):
+        return FPS if FPS_LOCK else 0
+    
+    def get_mouse_pos(self):
+        scale = get_scale(self.screen.width, self.screen.height)
+        offset = pg.Vector2(GAME_WIDTH / 2, GAME_HEIGHT / 2)
+        return (pg.Vector2(pg.mouse.get_pos()) / scale) - offset
