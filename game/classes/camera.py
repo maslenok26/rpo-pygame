@@ -1,8 +1,10 @@
 import pygame as pg
 
-from .player import Player
 from ..settings import GAME_WIDTH, GAME_HEIGHT
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .player import Player
 
 class Camera:
     def __init__(self):
@@ -17,7 +19,7 @@ class Camera:
     def get_offset(self):
         return -self.rect.x, -self.rect.y
     
-    def update(self, dt, target: Player, mouse_pos):
+    def update(self, dt, target: 'Player', mouse_pos: pg.Vector2):
         lerp_value = min(self.lerp_speed*dt, 1)
         self.pos = self.pos.lerp(
             target.pos + round(mouse_pos * self.mouse_sensitivity),
@@ -27,6 +29,3 @@ class Camera:
         self.rect.center = (
             pg.Vector2(target.rect.center) - round(self.target_dist)
         )
-
-    def adjust(self, sprite_rect: pg.Rect):
-        return sprite_rect.move(self.get_offset())
