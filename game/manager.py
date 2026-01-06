@@ -32,6 +32,7 @@ class GameManager:
     
     def update(self, dt):
         self.player.update(dt, self.sprites['collidables'])
+        self.sprites['projectiles'].update(dt, self.sprites['collidables'])
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         self.player.animate(mouse_screen_pos, self.camera.target_dist)
@@ -87,7 +88,8 @@ class GameManager:
     def _init_sprites(self):
         self.sprites: dict[str, pg.sprite.Group[pg.sprite.Sprite]] = {
             'all': pg.sprite.Group(),
-            'collidables': pg.sprite.Group()
+            'collidables': pg.sprite.Group(),
+            'projectiles': pg.sprite.Group()
         }
 
     def _init_camera(self):
@@ -96,10 +98,7 @@ class GameManager:
     def _init_level(self, level_map: list[str]=TEST_MAP):
         for sprite_group in self.sprites.values():
             sprite_group.empty()
-        dynamic_tiles = {
-            'W': (Wall, (self.sprites['all'], self.sprites['collidables'])),
-            'P': (Player, self.sprites['all'])
-        }
+        dynamic_tiles = {'W': Wall, 'P': Player}
         for y, row in enumerate(level_map):
             for x, tile in enumerate(row.split()):
                 self.static_surf.blit(
@@ -107,7 +106,7 @@ class GameManager:
                     (x*TILE_SIZE, y*TILE_SIZE)
                     )
                 if tile not in dynamic_tiles: continue
-                ObjectClass, groups = dynamic_tiles[tile]
-                new_object = ObjectClass(x, y, groups)
+                ObjectClass = dynamic_tiles[tile]
+                new_object = ObjectClass(self.sprites, x, y)
                 if ObjectClass is Player:
                     self.player: Player = new_object

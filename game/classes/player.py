@@ -10,8 +10,8 @@ from ..utils import scale_image
 
 
 class Player(Entity):
-    def __init__(self, x, y, groups):
-        super().__init__(groups)
+    def __init__(self, sprite_groups, x, y):
+        super().__init__(sprite_groups['all'])
 
         self.base_speed = TILE_SIZE * 7
         self.dash_speed = self.base_speed * 3
@@ -19,6 +19,9 @@ class Player(Entity):
 
         self.image = scale_image('vanya.jpg', (14, 14))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
+
+        self.hitbox = pg.Rect(0, 0, 8, 8)
+        self.hitbox.center = self.rect.center
 
         self.pos = pg.Vector2(self.rect.center)
         self.vector = pg.Vector2(0, 0)
@@ -28,7 +31,7 @@ class Player(Entity):
         self.timers = {'dash': Timer(
             duration=75, end_func=self._stop_dash, cooldown=1000
             )}
-        self.weapon = Weapon(self, groups)
+        self.weapon = Weapon(sprite_groups, self)
 
     def update(self, dt, collidables):
         self._get_input()
