@@ -21,8 +21,7 @@ class GameManager:
     
     def get_mouse_screen_pos(self):
         mouse_pos: pg.Vector2 = (
-            (pg.Vector2(pg.mouse.get_pos()) - self.layout['offset']) 
-            / self.layout['scale']
+            (pg.mouse.get_pos() - self.layout['offset']) / self.layout['scale']
         )
         mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, GAME_WIDTH)
         mouse_pos.y = pg.math.clamp(mouse_pos.y, 0, GAME_HEIGHT)
@@ -31,11 +30,13 @@ class GameManager:
         return screen_pos
     
     def update(self, dt):
-        self.player.update(dt, self.sprites['collidables'])
+        self.player.update_movement(dt, self.sprites['collidables'])
         self.sprites['projectiles'].update(dt, self.sprites['collidables'])
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
-        self.player.animate(mouse_screen_pos, self.camera.target_dist)
+        player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
+        self.player.update_actions(player_to_mouse_vec)
+        self.player.animate(player_to_mouse_vec.x)
 
     def draw(self):
         self.game_surf.fill((0, 0, 0))

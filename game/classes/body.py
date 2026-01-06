@@ -39,7 +39,7 @@ class Body(pg.sprite.Sprite, ABC):
                     'y', step.y, steps_to_do.y, steps_done.y, collidables
                     )
         self._rem -= steps_done
-        self.pos = pg.Vector2(self.rect.center) + self._rem
+        self.pos = self.rect.center + self._rem
 
     def _make_a_step(self, axis, step, steps_to_do, steps_done, collidables):
         if axis == 'x': self.hitbox.x += step
@@ -56,9 +56,9 @@ class Body(pg.sprite.Sprite, ABC):
             action = self._handle_collision()
             match action:
                 case 'STOP':
+                    steps_to_do = 0
                     if axis == 'x': self._rem.x = 0
                     elif axis == 'y': self._rem.y = 0
-                    steps_to_do = 0
                 case 'BOUNCE':
                     step *= -1
                     steps_to_do *= -1

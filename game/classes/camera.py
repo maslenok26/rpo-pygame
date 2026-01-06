@@ -26,6 +26,4 @@ class Camera:
             lerp_value
             )
         self.target_dist = target.pos - self.pos
-        self.rect.center = (
-            pg.Vector2(target.rect.center) - round(self.target_dist)
-        )
+        self.rect.center = target.rect.center - round(self.target_dist)

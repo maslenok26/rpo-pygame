@@ -33,16 +33,18 @@ class Player(Entity):
             )}
         self.weapon = Weapon(sprite_groups, self)
 
-    def update(self, dt, collidables):
+    def update_movement(self, dt, collidables):
         self._get_input()
         self._move(dt, collidables)
         self.timers['dash'].update()
-        self.weapon.update()
+    
+    def update_actions(self, player_to_mouse_vec):
+        self.weapon.update(player_to_mouse_vec)
 
-    def animate(self, mouse_pos, camera_dist: pg.Vector2):
+    def animate(self, player_to_mouse_vec_x):
         # ...
-        self._flip(mouse_pos, camera_dist.x)
-        self.weapon.animate(mouse_pos, camera_dist)
+        self._flip(player_to_mouse_vec_x)
+        self.weapon.animate()
 
     def _get_input(self):
         if self.timers['dash'].active: return
@@ -52,7 +54,7 @@ class Player(Entity):
         if keys[pg.K_a]: self.vector.x -= 1
         if keys[pg.K_s]: self.vector.y += 1
         if keys[pg.K_d]: self.vector.x += 1
-        if self.vector.length():
+        if self.vector:
             self.vector.normalize_ip()
             if keys[pg.K_SPACE]: self._start_dash()
         
@@ -63,9 +65,9 @@ class Player(Entity):
     def _stop_dash(self):
         self.speed = self.base_speed
 
-    def _flip(self, mouse_pos: pg.Vector2, camera_dist_x):
-        if ((mouse_pos.x < camera_dist_x and not self.flipped)
-            or (mouse_pos.x >= camera_dist_x and self.flipped)):
+    def _flip(self, player_to_mouse_vec_x: pg.Vector2):
+        if ((player_to_mouse_vec_x < 0 and not self.flipped)
+            or (player_to_mouse_vec_x >= 0 and self.flipped)):
             self.image = pg.transform.flip(
                 self.image, flip_x=True, flip_y=False
                 )
