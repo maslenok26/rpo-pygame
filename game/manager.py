@@ -87,8 +87,11 @@ class GameManager:
         self.clock = pg.time.Clock()
     
     def _init_sprites(self):
-        self.sprites: dict[str, pg.sprite.Group[pg.sprite.Sprite]] = {
-            'all': pg.sprite.Group(),
+        self.sprites: dict[
+            str, pg.sprite.LayeredUpdates[pg.sprite.Sprite]
+            | pg.sprite.Group[pg.sprite.Sprite]
+            ] = {
+            'all': pg.sprite.LayeredUpdates(),
             'collidables': pg.sprite.Group(),
             'projectiles': pg.sprite.Group()
         }

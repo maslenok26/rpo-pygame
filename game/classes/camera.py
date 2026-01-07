@@ -25,5 +25,5 @@ class Camera:
             target.pos + round(mouse_pos * self.mouse_sensitivity),
             lerp_value
             )
-        self.target_dist = target.pos - self.pos
-        self.rect.center = target.rect.center - round(self.target_dist)
+        self.target_dist = round(target.pos - self.pos)
+        self.rect.center = target.rect.center - self.target_dist

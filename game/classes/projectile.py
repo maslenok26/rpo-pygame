@@ -2,13 +2,15 @@ import pygame as pg
 
 from .body import Body
 from .timer import Timer
+from ..settings import LAYERS
 
 
 class Projectile(Body):
     def __init__(self, sprite_groups, x, y, vector: pg.Vector2):
+        self._layer = LAYERS['PROJECTILE']
         super().__init__((sprite_groups['all'], sprite_groups['projectiles']))
 
-        self.speed = 100
+        self.speed = 150
 
         self.orig_image = pg.image.load('assets\\projectile.png').convert_alpha()
         self.image = pg.transform.rotate(self.orig_image, -vector.angle)
@@ -16,6 +18,12 @@ class Projectile(Body):
 
         self.hitbox = pg.Rect(0, 0, 8, 6)
         self.hitbox.center = self.rect.center
+        is_colliding = pg.sprite.spritecollideany(
+            self,
+            sprite_groups['collidables'], 
+            collided=self._check_hitbox_collision
+            )
+        if is_colliding: self.kill()
 
         self.pos = pg.math.Vector2(self.rect.center)
         self.vector = vector

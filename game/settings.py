@@ -9,6 +9,13 @@ LETTERBOXING = True
 
 # ПАРАМЕТРЫ СПРАЙТОВ
 TILE_SIZE = 16
+LAYERS = {
+    'WALL_FACE': 0,
+    'PLAYER': 2,
+    'WEAPON': 3,
+    'PROJECTILE': 4,
+    'WALL_TOP': 5
+}
 
 # ПАРАМЕТРЫ ФИЗИКИ
 SUB_STEP = 1

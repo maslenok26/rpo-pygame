@@ -2,6 +2,7 @@ import pygame as pg
 
 from .timer import Timer
 from .projectile import Projectile
+from ..settings import LAYERS
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -10,6 +11,7 @@ if TYPE_CHECKING:
 
 class Weapon(pg.sprite.Sprite):
     def __init__(self, sprite_groups, owner: 'Player'):
+        self._layer = LAYERS['WEAPON']
         super().__init__(sprite_groups['all'])
 
         self.orbit_offset = pg.Vector2(3, 4)
@@ -65,10 +67,15 @@ class Weapon(pg.sprite.Sprite):
         self.rect.center += self.cur_orbit_offset
 
     def _rotate_image(self):
+        angle = self.vector.angle
         image_to_rotate = self.orig_image
         if self.owner.flipped:
             image_to_rotate = pg.transform.flip(
                 image_to_rotate, flip_x=False, flip_y=True
                 )
-        self.image = pg.transform.rotate(image_to_rotate, -self.vector.angle)
+        self.image = pg.transform.rotate(image_to_rotate, -angle)
+        if angle >= 0: layer = LAYERS['WEAPON']
+        else: layer = LAYERS['WEAPON'] - 2
+        if layer != self._layer:
+            self.sprite_groups['all'].change_layer(self, layer)
         self.rect = self.image.get_rect(center=self.rect.center)

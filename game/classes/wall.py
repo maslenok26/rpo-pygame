@@ -1,11 +1,34 @@
 import pygame as pg
 
-from ..settings import TILE_SIZE
+from .hitbox_sprite import HitboxSprite
+from ..settings import LAYERS, TILE_SIZE
 
 
-class Wall(pg.sprite.Sprite):
+class Wall:
     def __init__(self, sprite_groups, x, y):
+        WallTop(sprite_groups, x, y)
+        WallFace(sprite_groups, x, y+1)
+
+
+class WallTop(HitboxSprite):
+    def __init__(self, sprite_groups, x, y):
+        self._layer = LAYERS['WALL_TOP']
         super().__init__((sprite_groups['all'], sprite_groups['collidables']))
-        self.image = pg.Surface((TILE_SIZE, TILE_SIZE))
-        self.image.fill((75, 75, 75))
+
+        self.image = pg.image.load('assets\\wall.png')
+        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
+
+        self.hitbox = self.rect.move(0, 5)
+
+
+class WallFace(pg.sprite.Sprite):
+    def __init__(self, sprite_groups, x, y):
+        self._layer = LAYERS['WALL_FACE']
+        super().__init__((sprite_groups['all']))
+
+        self.image = pg.image.load('assets\\wall_face.png')
+        shading = pg.Surface(self.image.get_size())
+        shading.fill((0, 0, 0))
+        shading.set_alpha(100)
+        self.image.blit(shading)
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))

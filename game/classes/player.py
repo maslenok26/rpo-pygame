@@ -5,15 +5,16 @@ import pygame as pg
 from .entity import Entity
 from .timer import Timer
 from .weapon import Weapon
-from ..settings import TILE_SIZE, SUB_STEP
+from ..settings import LAYERS, TILE_SIZE
 from ..utils import scale_image
 
 
 class Player(Entity):
     def __init__(self, sprite_groups, x, y):
+        self._layer = LAYERS['PLAYER']
         super().__init__(sprite_groups['all'])
 
-        self.base_speed = TILE_SIZE * 7
+        self.base_speed = TILE_SIZE * 8
         self.dash_speed = self.base_speed * 3
         self.speed = self.base_speed
 

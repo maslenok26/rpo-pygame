@@ -3,20 +3,17 @@ from math import copysign
 
 import pygame as pg
 
+from .hitbox_sprite import HitboxSprite
 from ..settings import SUB_STEP
 
 
-class Body(pg.sprite.Sprite, ABC):
+class Body(HitboxSprite, ABC):
     def __init__(self, sprite_groups):
         super().__init__(sprite_groups)
 
         self.speed = 0
 
-        self.rect = pg.Rect(0, 0, 0, 0)
-        
-        self.hitbox = pg.Rect(0, 0, 0, 0)
-
-        self.pos = pg.Vector2(self.rect.center)
+        self.pos = pg.Vector2(0, 0)
         self.vector = pg.Vector2(0, 0)
         self._rem = pg.Vector2(0, 0)
 
@@ -74,12 +71,6 @@ class Body(pg.sprite.Sprite, ABC):
                     self.kill()
         self.rect.center = self.hitbox.center
         return step, steps_to_do, steps_done
-    
-    def _check_hitbox_collision(
-            self, body: 'Body', collidable: pg.sprite.Sprite
-            ):
-        is_colliding = body.hitbox.colliderect(collidable.rect)
-        return is_colliding
 
     @abstractmethod
     def _handle_collision(self) -> str:
