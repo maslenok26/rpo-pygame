@@ -1,8 +1,6 @@
 from os import listdir
 from random import choice
-
 import pygame as pg
-
 from .classes import *
 from .settings import *
 
@@ -52,13 +50,13 @@ class GameManager:
     
     def update_layout(self):
         scales = (
-            self.screen.width / GAME_WIDTH, self.screen.height / GAME_HEIGHT
+            self.screen.get_width() / GAME_WIDTH, self.screen.get_height() / GAME_HEIGHT
             )
         scale = min(scales) if LETTERBOXING else max(scales)
         scaled_width = GAME_WIDTH * scale
         scaled_height = GAME_HEIGHT * scale
-        offset_x = (self.screen.width - scaled_width) // 2
-        offset_y = (self.screen.height - scaled_height) // 2
+        offset_x = (self.screen.get_width() - scaled_width) // 2
+        offset_y = (self.screen.get_width() - scaled_height) // 2
         self.layout['scale'] = scale
         self.layout['offset'] = pg.Vector2(offset_x, offset_y)
         self.layout['size'] = (int(scaled_width), int(scaled_height))
