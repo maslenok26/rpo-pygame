@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC
 
 import pygame as pg
@@ -12,11 +13,11 @@ class HitboxSprite(BaseSprite, ABC):
         self.hitbox: pg.Rect = None
 
     def _check_hitbox_collision(
-            self, sprite: 'HitboxSprite', collidable: 'HitboxSprite'
+            self, sprite: HitboxSprite, collidable: HitboxSprite
             ):
         is_colliding = sprite.hitbox.colliderect(collidable.hitbox)
         return is_colliding
     
-    def _create_hitbox(self, width, height, pos):
+    def _init_hitbox(self, width, height, *pos):
         self.hitbox = pg.Rect(0, 0, width, height)
         self.hitbox.center = pos

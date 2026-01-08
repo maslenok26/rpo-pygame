@@ -72,7 +72,7 @@ class Weapon(BaseSprite):
     def _rotate_image(self):
         angle = self.vector.angle
         image_to_rotate = self.orig_image
-        if self.owner.flipped:
+        if self.owner.image_flipped:
             image_to_rotate = pg.transform.flip(
                 image_to_rotate, flip_x=False, flip_y=True
                 )

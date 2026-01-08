@@ -20,15 +20,12 @@ class Player(Entity):
         self.dash_speed = self.base_speed * 3
         self.speed = self.base_speed
 
-        self.image = scale_image('vanya.jpg', (14, 14))
-        self.flipped = False
+        self.image = scale_image('player.jpg', (14, 14))
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
 
-        self._create_hitbox(10, 10, self.rect.center)
+        self._init_hitbox(10, 10, self.rect.center)
 
         self.pos = pg.Vector2(self.rect.center)
-        self.vector = pg.Vector2(0, 0)
-        self._rem = pg.Vector2(0, 0)
 
         self.weapon = Weapon(sprite_groups, owner=self)
         self.timers = {'dash': Timer(
@@ -45,7 +42,7 @@ class Player(Entity):
 
     def animate(self, player_to_mouse_vec_x):
         # ...
-        self._flip(player_to_mouse_vec_x)
+        self._flip_image(player_to_mouse_vec_x)
         self.weapon.animate()
 
     def _get_input(self):
@@ -67,10 +64,10 @@ class Player(Entity):
     def _stop_dash(self):
         self.speed = self.base_speed
 
-    def _flip(self, player_to_mouse_vec_x: pg.Vector2):
-        if ((player_to_mouse_vec_x < 0 and not self.flipped)
-            or (player_to_mouse_vec_x >= 0 and self.flipped)):
+    def _flip_image(self, player_to_mouse_vec_x: pg.Vector2):
+        if ((player_to_mouse_vec_x < 0 and not self.image_flipped)
+            or (player_to_mouse_vec_x >= 0 and self.image_flipped)):
             self.image = pg.transform.flip(
                 self.image, flip_x=True, flip_y=False
                 )
-            self.flipped = not self.flipped
+            self.image_flipped = not self.image_flipped

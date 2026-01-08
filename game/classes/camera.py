@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pygame as pg
 
 from ..settings import GAME_WIDTH, GAME_HEIGHT
@@ -19,7 +21,7 @@ class Camera:
     def get_offset(self):
         return -self.rect.x, -self.rect.y
     
-    def update(self, dt, target: 'Player', mouse_pos: pg.Vector2):
+    def update(self, dt, target: Player, mouse_pos: pg.Vector2):
         lerp_value = min(self.lerp_speed*dt, 1)
         self.pos = self.pos.lerp(
             target.pos + round(mouse_pos * self.mouse_sensitivity),

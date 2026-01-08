@@ -17,6 +17,8 @@ class Body(HitboxSprite, ABC):
         self.vector = pg.Vector2(0, 0)
         self._rem = pg.Vector2(0, 0)
 
+        self.has_shadow = True
+
     def _move(self, dt, collidables):
         if not self.vector.length(): return
         self._rem += self.vector * self.speed * dt
@@ -41,16 +43,19 @@ class Body(HitboxSprite, ABC):
     def _make_a_step(self, axis, step, steps_to_do, steps_done, collidables):
         if axis == 'x': self.hitbox.x += step
         elif axis == 'y': self.hitbox.y += step
-        is_colliding = pg.sprite.spritecollideany(
-            self, collidables, collided=self._check_hitbox_collision
+        collisions = pg.sprite.spritecollide(
+            self,
+            collidables,
+            dokill=False,
+            collided=self._check_hitbox_collision
             )
-        if not is_colliding:
+        if not collisions:
             steps_done += step
             steps_to_do -= step
         else:
             if axis == 'x': self.hitbox.x -= step
             elif axis == 'y': self.hitbox.y -= step
-            action = self._handle_collision()
+            action = self._handle_collision(collisions)
             match action:
                 case 'STOP':
                     steps_to_do = 0
@@ -74,5 +79,5 @@ class Body(HitboxSprite, ABC):
         return step, steps_to_do, steps_done
 
     @abstractmethod
-    def _handle_collision(self) -> str:
+    def _handle_collision(self, collisions) -> str:
         ...

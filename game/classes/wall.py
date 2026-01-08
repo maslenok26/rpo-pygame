@@ -16,7 +16,7 @@ class WallTop(HitboxSprite):
         super().__init__(sprite_groups)
 
         self._layer = LAYERS['WALL_TOP']
-        self.add_to_groups('rendering', 'collidables')
+        self.add_to_groups('rendering', 'collidables', 'hittables')
 
         self.image = pg.image.load('assets\\wall.png')
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))

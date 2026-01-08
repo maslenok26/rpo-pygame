@@ -5,7 +5,10 @@ import pygame as pg
 
 from .classes import *
 from .settings import *
-from .types import SpriteGroups
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .types import SpriteGroups
 
 
 class GameManager:
@@ -33,7 +36,9 @@ class GameManager:
     
     def update(self, dt):
         self.player.update_movement(dt, self.sprite_groups['collidables'])
-        self.sprite_groups['projectiles'].update(dt, self.sprite_groups['collidables'])
+        self.sprite_groups['projectiles'].update(
+            dt, self.sprite_groups['hittables']
+            )
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
@@ -92,7 +97,9 @@ class GameManager:
         self.sprite_groups: SpriteGroups = {
             'rendering': pg.sprite.LayeredUpdates(),
             'collidables': pg.sprite.Group(),
-            'projectiles': pg.sprite.Group()
+            'enemies': pg.sprite.Group(),
+            'projectiles': pg.sprite.Group(),
+            'hittables': pg.sprite.Group()
         }
 
     def _init_camera(self):
@@ -102,7 +109,7 @@ class GameManager:
         sprite_group: pg.sprite.AbstractGroup
         for sprite_group in self.sprite_groups.values():
             sprite_group.empty()
-        dynamic_tiles = {'W': Wall, 'P': Player}
+        dynamic_tiles = {'W': Wall, 'P': Player, 'E': Enemy}
         for y, row in enumerate(level_map):
             for x, tile in enumerate(row.split()):
                 self.static_surf.blit(

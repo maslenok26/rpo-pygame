@@ -1,8 +1,11 @@
+from __future__ import annotations
 from abc import ABC
 
 import pygame as pg
 
-from ..types import SpriteGroups
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..types import SpriteGroups
 
 
 class BaseSprite(pg.sprite.Sprite, ABC):
@@ -17,6 +20,8 @@ class BaseSprite(pg.sprite.Sprite, ABC):
 
         self.image: pg.Surface | None = None
         self.rect: pg.Rect | None = None
+
+        self.has_shadow = False
 
     def add_to_groups(self, *names):
         for name in names:
