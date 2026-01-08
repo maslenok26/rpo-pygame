@@ -69,7 +69,8 @@ class Body(HitboxSprite, ABC):
                 case 'DESTROY':
                     steps_to_do = 0
                     self.kill()
-        self.rect.center = self.hitbox.center
+        if self.rect:
+            self.rect.center = self.hitbox.center
         return step, steps_to_do, steps_done
 
     @abstractmethod

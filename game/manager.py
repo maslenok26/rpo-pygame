@@ -5,6 +5,7 @@ import pygame as pg
 
 from .classes import *
 from .settings import *
+from .types import SpriteGroups
 
 
 class GameManager:
@@ -12,7 +13,7 @@ class GameManager:
         self._init_display()
         self._init_assets()
         self._init_clock()
-        self._init_sprites()
+        self._init_sprite_groups()
         self._init_camera()
         self._init_level()
 
@@ -23,15 +24,16 @@ class GameManager:
         mouse_pos: pg.Vector2 = (
             (pg.mouse.get_pos() - self.layout['offset']) / self.layout['scale']
         )
-        mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, GAME_WIDTH)
-        mouse_pos.y = pg.math.clamp(mouse_pos.y, 0, GAME_HEIGHT)
+        if LETTERBOXING:
+            mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, GAME_WIDTH)
+            mouse_pos.y = pg.math.clamp(mouse_pos.y, 0, GAME_HEIGHT)
         game_surf_center = pg.Vector2(GAME_WIDTH / 2, GAME_HEIGHT / 2)
         screen_pos = mouse_pos - game_surf_center
         return screen_pos
     
     def update(self, dt):
-        self.player.update_movement(dt, self.sprites['collidables'])
-        self.sprites['projectiles'].update(dt, self.sprites['collidables'])
+        self.player.update_movement(dt, self.sprite_groups['collidables'])
+        self.sprite_groups['projectiles'].update(dt, self.sprite_groups['collidables'])
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
@@ -43,7 +45,7 @@ class GameManager:
         self.screen.fill((0, 0, 0))
         camera_offset = self.camera.get_offset()
         self.game_surf.blit(self.static_surf, camera_offset)
-        for sprite in self.sprites['all']:
+        for sprite in self.sprite_groups['rendering']:
             self.game_surf.blit(sprite.image, sprite.rect.move(camera_offset))
         scaled_game_surf = pg.transform.scale(
             self.game_surf, self.layout['size']
@@ -86,12 +88,9 @@ class GameManager:
     def _init_clock(self):
         self.clock = pg.time.Clock()
     
-    def _init_sprites(self):
-        self.sprites: dict[
-            str, pg.sprite.LayeredUpdates[pg.sprite.Sprite]
-            | pg.sprite.Group[pg.sprite.Sprite]
-            ] = {
-            'all': pg.sprite.LayeredUpdates(),
+    def _init_sprite_groups(self):
+        self.sprite_groups: SpriteGroups = {
+            'rendering': pg.sprite.LayeredUpdates(),
             'collidables': pg.sprite.Group(),
             'projectiles': pg.sprite.Group()
         }
@@ -100,7 +99,8 @@ class GameManager:
         self.camera = Camera()
 
     def _init_level(self, level_map: list[str]=TEST_MAP):
-        for sprite_group in self.sprites.values():
+        sprite_group: pg.sprite.AbstractGroup
+        for sprite_group in self.sprite_groups.values():
             sprite_group.empty()
         dynamic_tiles = {'W': Wall, 'P': Player}
         for y, row in enumerate(level_map):
@@ -111,6 +111,6 @@ class GameManager:
                     )
                 if tile not in dynamic_tiles: continue
                 ObjectClass = dynamic_tiles[tile]
-                new_object = ObjectClass(self.sprites, x, y)
+                new_object = ObjectClass(self.sprite_groups, x, y)
                 if ObjectClass is Player:
                     self.player: Player = new_object

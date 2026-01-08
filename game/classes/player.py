@@ -11,28 +11,29 @@ from ..utils import scale_image
 
 class Player(Entity):
     def __init__(self, sprite_groups, x, y):
+        super().__init__(sprite_groups)
+
         self._layer = LAYERS['PLAYER']
-        super().__init__(sprite_groups['all'])
+        self.add_to_groups('rendering')
 
         self.base_speed = TILE_SIZE * 8
         self.dash_speed = self.base_speed * 3
         self.speed = self.base_speed
 
         self.image = scale_image('vanya.jpg', (14, 14))
+        self.flipped = False
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
 
-        self.hitbox = pg.Rect(0, 0, 8, 8)
-        self.hitbox.center = self.rect.center
+        self._create_hitbox(10, 10, self.rect.center)
 
         self.pos = pg.Vector2(self.rect.center)
         self.vector = pg.Vector2(0, 0)
         self._rem = pg.Vector2(0, 0)
 
-        self.flipped = False
+        self.weapon = Weapon(sprite_groups, owner=self)
         self.timers = {'dash': Timer(
             duration=75, end_func=self._stop_dash, cooldown=1000
             )}
-        self.weapon = Weapon(sprite_groups, self)
 
     def update_movement(self, dt, collidables):
         self._get_input()

@@ -7,8 +7,10 @@ from ..settings import LAYERS
 
 class Projectile(Body):
     def __init__(self, sprite_groups, x, y, vector: pg.Vector2):
+        super().__init__(sprite_groups)
+
         self._layer = LAYERS['PROJECTILE']
-        super().__init__((sprite_groups['all'], sprite_groups['projectiles']))
+        self.add_to_groups('rendering', 'projectiles')
 
         self.speed = 150
 
@@ -16,8 +18,7 @@ class Projectile(Body):
         self.image = pg.transform.rotate(self.orig_image, -vector.angle)
         self.rect = self.image.get_rect(center=(x, y))
 
-        self.hitbox = pg.Rect(0, 0, 8, 6)
-        self.hitbox.center = self.rect.center
+        self._create_hitbox(8, 6, self.rect.center)
         is_colliding = pg.sprite.spritecollideany(
             self,
             sprite_groups['collidables'], 

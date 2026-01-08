@@ -11,8 +11,9 @@ LETTERBOXING = True
 TILE_SIZE = 16
 LAYERS = {
     'WALL_FACE': 0,
+    'WEAPON_BACK': 1,
     'PLAYER': 2,
-    'WEAPON': 3,
+    'WEAPON_FRONT': 3,
     'PROJECTILE': 4,
     'WALL_TOP': 5
 }

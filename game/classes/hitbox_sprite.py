@@ -2,12 +2,12 @@ from abc import ABC
 
 import pygame as pg
 
+from .base_sprite import BaseSprite
 
-class HitboxSprite(pg.sprite.Sprite, ABC):
+
+class HitboxSprite(BaseSprite, ABC):
     def __init__(self, sprite_groups):
         super().__init__(sprite_groups)
-
-        self.rect: pg.Rect = None
 
         self.hitbox: pg.Rect = None
 
@@ -16,3 +16,7 @@ class HitboxSprite(pg.sprite.Sprite, ABC):
             ):
         is_colliding = sprite.hitbox.colliderect(collidable.hitbox)
         return is_colliding
+    
+    def _create_hitbox(self, width, height, pos):
+        self.hitbox = pg.Rect(0, 0, width, height)
+        self.hitbox.center = pos
