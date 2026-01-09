@@ -33,29 +33,36 @@ class Player(Entity):
             )}
 
     def update_movement(self, dt, collidables):
-        self._get_input()
+        self._get_movement_input()
         self._move(dt, collidables)
         self.timers['dash'].update()
     
-    def update_actions(self, player_to_mouse_vec):
-        self.weapon.update(player_to_mouse_vec)
+    def update_actions(self, player_to_mouse_vec: pg.Vector2):
+        if player_to_mouse_vec:
+            self.look_vec = player_to_mouse_vec.normalize()
+        self.weapon.update(self.look_vec)
+        self._get_actions_input()
 
-    def animate(self, player_to_mouse_vec_x):
+    def animate(self):
         # ...
-        self._flip_image(player_to_mouse_vec_x)
-        self.weapon.animate()
+        self._flip_image()
+        if self.weapon: self.weapon.animate()
 
-    def _get_input(self):
+    def _get_movement_input(self):
         if self.timers['dash'].active: return
-        self.vector *= 0
+        self.move_vec *= 0
         keys = pg.key.get_pressed()
-        if keys[pg.K_w]: self.vector.y -= 1
-        if keys[pg.K_a]: self.vector.x -= 1
-        if keys[pg.K_s]: self.vector.y += 1
-        if keys[pg.K_d]: self.vector.x += 1
-        if self.vector:
-            self.vector.normalize_ip()
+        if keys[pg.K_w]: self.move_vec.y -= 1
+        if keys[pg.K_a]: self.move_vec.x -= 1
+        if keys[pg.K_s]: self.move_vec.y += 1
+        if keys[pg.K_d]: self.move_vec.x += 1
+        if self.move_vec:
+            self.move_vec.normalize_ip()
             if keys[pg.K_SPACE]: self._start_dash()
+
+    def _get_actions_input(self):
+        mouse = pg.mouse.get_pressed()
+        if mouse[0]: self.weapon.shoot()
         
     def _start_dash(self):
         if self.timers['dash'].start():
@@ -64,9 +71,9 @@ class Player(Entity):
     def _stop_dash(self):
         self.speed = self.base_speed
 
-    def _flip_image(self, player_to_mouse_vec_x: pg.Vector2):
-        if ((player_to_mouse_vec_x < 0 and not self.image_flipped)
-            or (player_to_mouse_vec_x >= 0 and self.image_flipped)):
+    def _flip_image(self):
+        if ((self.look_vec.x < 0 and not self.image_flipped)
+            or (self.look_vec.x > 0 and self.image_flipped)):
             self.image = pg.transform.flip(
                 self.image, flip_x=True, flip_y=False
                 )

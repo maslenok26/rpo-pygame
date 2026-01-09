@@ -18,7 +18,7 @@ class Projectile(Body):
         self._layer = LAYERS['PROJECTILE']
         self.add_to_groups('rendering', 'projectiles')
 
-        self.speed = 150
+        self.speed = 180
         self.damage = 20
 
         self.orig_image = pg.image.load('assets\\projectile.png').convert_alpha()
@@ -34,7 +34,7 @@ class Projectile(Body):
         if is_colliding: self.kill()
 
         self.pos = pg.math.Vector2(self.rect.center)
-        self.vector = vector
+        self.move_vec = vector
 
         self.timers = {
             'lifetime': Timer(
@@ -54,5 +54,5 @@ class Projectile(Body):
                 sprite: Enemy
                 sprite.take_damage(self.damage)
                 return 'DESTROY'
-        self.image = pg.transform.rotate(self.orig_image, self.vector.angle)
+        self.image = pg.transform.rotate(self.orig_image, self.move_vec.angle)
         return 'BOUNCE'

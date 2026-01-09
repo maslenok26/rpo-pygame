@@ -36,6 +36,9 @@ class GameManager:
     
     def update(self, dt):
         self.player.update_movement(dt, self.sprite_groups['collidables'])
+        self.sprite_groups['enemies'].update(
+            dt, self.sprite_groups['collidables']
+            )
         self.sprite_groups['projectiles'].update(
             dt, self.sprite_groups['hittables']
             )
@@ -43,7 +46,7 @@ class GameManager:
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
         self.player.update_actions(player_to_mouse_vec)
-        self.player.animate(player_to_mouse_vec.x)
+        self.player.animate()
 
     def draw(self):
         self.game_surf.fill((0, 0, 0))
@@ -119,5 +122,10 @@ class GameManager:
                 if tile not in dynamic_tiles: continue
                 ObjectClass = dynamic_tiles[tile]
                 new_object = ObjectClass(self.sprite_groups, x, y)
-                if ObjectClass is Player:
-                    self.player: Player = new_object
+                if ObjectClass is Player: player = new_object
+        self._init_player(player)
+
+    def _init_player(self, player: Player):
+        self.player = player
+        for enemy in self.sprite_groups['enemies']:
+            enemy.target = player

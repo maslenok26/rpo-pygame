@@ -14,14 +14,14 @@ class Body(HitboxSprite, ABC):
         self.speed = 0
 
         self.pos = pg.Vector2(0, 0)
-        self.vector = pg.Vector2(0, 0)
+        self.move_vec = pg.Vector2(0, 0)
         self._rem = pg.Vector2(0, 0)
 
         self.has_shadow = True
 
     def _move(self, dt, collidables):
-        if not self.vector.length(): return
-        self._rem += self.vector * self.speed * dt
+        if not self.move_vec: return
+        self._rem += self.move_vec * self.speed * dt
         steps_to_do: pg.Vector2 = round(self._rem)
         steps_done = pg.Vector2(0, 0)
         step = pg.Vector2(
@@ -66,10 +66,10 @@ class Body(HitboxSprite, ABC):
                     steps_to_do *= -1
                     steps_done *= -1
                     if axis == 'x':
-                        self.vector.x *= -1
+                        self.move_vec.x *= -1
                         self._rem.x *= -1
                     elif axis == 'y':
-                        self.vector.y *= -1
+                        self.move_vec.y *= -1
                         self._rem.y *= -1
                 case 'DESTROY':
                     steps_to_do = 0

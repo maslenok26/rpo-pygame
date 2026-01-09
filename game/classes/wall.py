@@ -20,7 +20,6 @@ class WallTop(HitboxSprite):
 
         self.image = pg.image.load('assets\\wall.png')
         self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
-
         self.hitbox = self.rect.move(0, 5)
 
 

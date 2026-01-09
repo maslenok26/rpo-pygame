@@ -1,6 +1,9 @@
 from abc import ABC
 
+import pygame as pg
+
 from .body import Body
+from .weapon import Weapon
 
 
 class Entity(Body, ABC):
@@ -12,6 +15,10 @@ class Entity(Body, ABC):
 
         self.image_flipped = False
 
+        self.look_vec = pg.Vector2(1, 0)
+
+        self.weapon: Weapon | None = None
+
     def take_damage(self, amount):
         if self.is_dead: return
         self.hp -= amount
@@ -19,8 +26,9 @@ class Entity(Body, ABC):
             self.die()
     
     def die(self):
-        self.kill()
         self.is_dead = True
+        self.kill()
+        if self.weapon: self.weapon.kill()
 
     def _handle_collision(self, _):
         return 'STOP'
