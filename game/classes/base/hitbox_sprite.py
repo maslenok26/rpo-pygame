@@ -7,10 +7,12 @@ from .base_sprite import BaseSprite
 
 
 class HitboxSprite(BaseSprite, ABC):
-    def __init__(self, sprite_groups):
-        super().__init__(sprite_groups)
+    hitbox: pg.Rect
 
-        self.hitbox: pg.Rect = None
+    def __init__(self, sprite_groups, assets, pos):
+        super().__init__(sprite_groups, assets, pos)
+
+        self.hitbox = None
 
     def _check_hitbox_collision(
             self, sprite: HitboxSprite, collidable: HitboxSprite
@@ -18,6 +20,6 @@ class HitboxSprite(BaseSprite, ABC):
         is_colliding = sprite.hitbox.colliderect(collidable.hitbox)
         return is_colliding
     
-    def _init_hitbox(self, width, height, *pos):
-        self.hitbox = pg.Rect(0, 0, width, height)
+    def _init_hitbox(self, size, pos):
+        self.hitbox = pg.Rect(0, 0, *size)
         self.hitbox.center = pos

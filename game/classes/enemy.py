@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-from .entity import Entity
+from . import Entity
 from .weapon import Weapon
-from .timer import Timer
-from ..settings import LAYERS, TILE_SIZE
-from ..utils import scale_image
+from .. import config as cfg
 
 import pygame as pg
 
@@ -14,36 +12,37 @@ if TYPE_CHECKING:
 
 
 class Enemy(Entity):
-    def __init__(self, sprite_groups, x, y):
-        super().__init__(sprite_groups)
+    target: Player | None
 
-        self._layer = LAYERS['PLAYER'] + 1
-        self.add_to_groups('rendering', 'hittables', 'enemies')
+    def __init__(self, sprite_groups, assets, pos):
+        super().__init__(sprite_groups, assets, pos)
+
+        self._layer = cfg.LAYERS['ENEMY']
+        self.add_to_groups('rendering', 'enemies')
 
         self.hp = 100
-        self.damage = 10
-
-        self.speed = TILE_SIZE * 3
+        self.speed = cfg.TILE_SIZE * 3
         self.detection_radius = 120
         self.shoot_radius = 100
 
-        self.image = scale_image('enemy.png', (14, 14))
-        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
+        self.set_image(self.assets['enemy'])
 
-        self._init_hitbox(10, 10, self.rect.center)
+        self._init_hitbox((10, 10), pos)
 
-        self.pos = pg.Vector2(self.rect.center)
-
-        self.target: Player | None = None
+        self.target = None
         self.target_dist = 0
+        self.weapon = Weapon(
+            sprite_groups, assets, 
+            owner=self,
+            proj_self_group_key='enemy_projectiles',
+            proj_target_group_keys=('player',)
+        )
 
-        self.weapon = Weapon(sprite_groups, owner=self)
-
-    def update(self, dt, collidables):
+    def update(self, dt):
         if self.target:
             self._follow_target()
-        self._move(dt, collidables)
-        if self.target and self.weapon:
+        self._move(dt)
+        if self.target:
             self.weapon.update(self.look_vec)
             self._attack_target()
         self.animate()
@@ -62,15 +61,6 @@ class Enemy(Entity):
         self.move_vec = self_to_target_vec.normalize()
         self.look_vec = self.move_vec.copy()
 
-
     def _attack_target(self):
         if self.target_dist < self.shoot_radius:
             self.weapon.shoot()
-        
-    def _flip_image(self):
-        if ((self.look_vec.x < 0 and not self.image_flipped)
-            or (self.look_vec.x > 0 and self.image_flipped)):
-            self.image = pg.transform.flip(
-                self.image, flip_x=True, flip_y=False
-                )
-            self.image_flipped = not self.image_flipped

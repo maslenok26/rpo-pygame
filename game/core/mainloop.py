@@ -5,7 +5,8 @@ from .manager import GameManager
 
 def mainloop(gm: GameManager):
 
-    pg.mouse.set_pos(gm.screen.width // 1.453, gm.screen.height // 2)
+    gm.init_level()
+
     fps = gm.get_fps()
     running = True
 

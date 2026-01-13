@@ -2,21 +2,23 @@ from __future__ import annotations
 
 import pygame as pg
 
-from ..settings import GAME_WIDTH, GAME_HEIGHT
+from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .player import Player
 
+
 class Camera:
     def __init__(self):
         self.lerp_speed = 12.25
-        self.mouse_sensitivity = 0.25
+        self.mouse_sensitivity = 0.35
 
-        self.pos = pg.Vector2(0, 0)
-        self.rect = pg.Rect(0, 0, GAME_WIDTH, GAME_HEIGHT)
+        self.rect = pg.Rect(0, 0, cfg.GAME_WIDTH, cfg.GAME_HEIGHT)
+        
+        self.pos = pg.Vector2()
 
-        self.target_dist = pg.Vector2(0, 0)
+        self.target_dist = pg.Vector2()
 
     def get_offset(self):
         return -self.rect.x, -self.rect.y

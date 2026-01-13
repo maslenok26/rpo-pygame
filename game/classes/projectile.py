@@ -1,57 +1,71 @@
 from __future__ import annotations
+from itertools import chain
 
 import pygame as pg
 
-from .body import Body
+from . import Body
 from .timer import Timer
-from ..settings import LAYERS
+from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .enemy import Enemy
+    from . import HitboxSprite, Entity
 
 
 class Projectile(Body):
-    def __init__(self, sprite_groups, x, y, vector: pg.Vector2):
-        super().__init__(sprite_groups)
+    target_groups: tuple[pg.sprite.Group]
+    collidables: tuple[HitboxSprite]
 
-        self._layer = LAYERS['PROJECTILE']
-        self.add_to_groups('rendering', 'projectiles')
+    def __init__(self, sprite_groups, assets, pos,
+                 vector: pg.Vector2, self_group_key, target_group_keys):
+        super().__init__(sprite_groups, assets, pos)
+
+        self._layer = cfg.LAYERS['PROJECTILE']
+        self.add_to_groups('rendering', self_group_key)
 
         self.speed = 180
         self.damage = 20
 
-        self.orig_image = pg.image.load('assets\\projectile.png').convert_alpha()
-        self.image = pg.transform.rotate(self.orig_image, -vector.angle)
-        self.rect = self.image.get_rect(center=(x, y))
-
-        self._init_hitbox(8, 6, self.rect.center)
+        self.orig_image = self.assets['projectile']
+        self.set_image(pg.transform.rotate(self.orig_image, -vector.angle))
+        
+        self._init_hitbox((8, 6), self.rect.center)
         is_colliding = pg.sprite.spritecollideany(
             self,
-            sprite_groups['collidables'], 
+            self.sprite_groups['obstacles'], 
             collided=self._check_hitbox_collision
             )
-        if is_colliding: self.kill()
+        if is_colliding:
+            self.kill()
+            return
+        self.target_groups = tuple(
+            self.sprite_groups[key] for key in target_group_keys
+        )
+        self._update_collidables()
 
-        self.pos = pg.math.Vector2(self.rect.center)
         self.move_vec = vector
-
+        
         self.timers = {
             'lifetime': Timer(
                 duration=3000, end_func=self.kill, cooldown=0
             )
         }
-
         self.timers['lifetime'].start()
     
-    def update(self, dt, collidables):
-        self._move(dt, collidables)
+    def update(self, dt):
+        self._update_collidables()
+        self._move(dt)
         self.timers['lifetime'].update()
+    
+    def _update_collidables(self):
+        self.collidables = tuple(
+            chain(self.sprite_groups['obstacles'], *self.target_groups)
+            )
     
     def _handle_collision(self, collisions):
         for sprite in collisions:
-            if sprite in self.sprite_groups['enemies']:
-                sprite: Enemy
+            if any(sprite in group for group in self.target_groups):
+                sprite: Entity
                 sprite.take_damage(self.damage)
                 return 'DESTROY'
         self.image = pg.transform.rotate(self.orig_image, self.move_vec.angle)

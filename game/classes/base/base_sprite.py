@@ -5,23 +5,29 @@ import pygame as pg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import SpriteGroups
+    from ...types import SpriteGroups, Assets
 
 
 class BaseSprite(pg.sprite.Sprite, ABC):
     sprite_groups: SpriteGroups
+    assets: Assets
+    _layer: int | None
+    image: pg.Surface | None
 
-    def __init__(self, sprite_groups: SpriteGroups):
+    def __init__(self, sprite_groups, assets, pos):
         super().__init__()
 
         self.sprite_groups = sprite_groups
+        self.assets = assets
 
-        self._layer: int | None = None
+        self._layer = None
 
-        self.image: pg.Surface | None = None
-        self.rect: pg.Rect | None = None
+        self.image = None
+        self.rect = pg.Rect(*pos, 0, 0)
 
-        self.has_shadow = False
+    def set_image(self, image: pg.Surface):
+        self.image = image
+        self.rect = image.get_rect(center=self.rect.center)
 
     def add_to_groups(self, *names):
         for name in names:

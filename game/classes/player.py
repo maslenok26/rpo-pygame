@@ -1,40 +1,41 @@
-from math import copysign
-
 import pygame as pg
 
-from .entity import Entity
+from . import Entity
 from .timer import Timer
 from .weapon import Weapon
-from ..settings import LAYERS, TILE_SIZE
-from ..utils import scale_image
+from .. import config as cfg
 
 
 class Player(Entity):
-    def __init__(self, sprite_groups, x, y):
-        super().__init__(sprite_groups)
+    def __init__(self, sprite_groups, assets, pos):
+        super().__init__(sprite_groups, assets, pos)
 
-        self._layer = LAYERS['PLAYER']
-        self.add_to_groups('rendering')
+        self._layer = cfg.LAYERS['PLAYER']
+        self.add_to_groups('rendering', 'player')
 
-        self.base_speed = TILE_SIZE * 8
+        self.base_speed = cfg.TILE_SIZE * 8
         self.dash_speed = self.base_speed * 3
+        self.hp = 100
         self.speed = self.base_speed
 
-        self.image = scale_image('player.jpg', (14, 14))
-        self.rect = self.image.get_rect(topleft=(x*TILE_SIZE, y*TILE_SIZE))
+        self.set_image(self.assets['player'])
 
-        self._init_hitbox(10, 10, self.rect.center)
+        self._init_hitbox((10, 10), self.rect.center)
 
-        self.pos = pg.Vector2(self.rect.center)
-
-        self.weapon = Weapon(sprite_groups, owner=self)
         self.timers = {'dash': Timer(
             duration=75, end_func=self._stop_dash, cooldown=1000
             )}
+        
+        self.weapon = Weapon(
+            sprite_groups, assets, 
+            owner=self,
+            proj_self_group_key='player_projectiles',
+            proj_target_group_keys=('enemies', 'player')
+        )
 
-    def update_movement(self, dt, collidables):
+    def update_movement(self, dt):
         self._get_movement_input()
-        self._move(dt, collidables)
+        self._move(dt)
         self.timers['dash'].update()
     
     def update_actions(self, player_to_mouse_vec: pg.Vector2):
@@ -44,9 +45,8 @@ class Player(Entity):
         self._get_actions_input()
 
     def animate(self):
-        # ...
         self._flip_image()
-        if self.weapon: self.weapon.animate()
+        self.weapon.animate()
 
     def _get_movement_input(self):
         if self.timers['dash'].active: return
@@ -70,11 +70,3 @@ class Player(Entity):
 
     def _stop_dash(self):
         self.speed = self.base_speed
-
-    def _flip_image(self):
-        if ((self.look_vec.x < 0 and not self.image_flipped)
-            or (self.look_vec.x > 0 and self.image_flipped)):
-            self.image = pg.transform.flip(
-                self.image, flip_x=True, flip_y=False
-                )
-            self.image_flipped = not self.image_flipped

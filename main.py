@@ -1,8 +1,6 @@
 import pygame as pg
 
-from game.core import mainloop
-from game.manager import GameManager
-
+from game.core import mainloop, GameManager
 
 pg.display.init()
 
