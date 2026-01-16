@@ -29,7 +29,10 @@ class Projectile(Body):
         self.orig_image = self.assets['projectile']
         self.set_image(pg.transform.rotate(self.orig_image, -vector.angle))
         
-        self._init_hitbox((8, 6), self.rect.center)
+        hb_width, hb_height = 8, 6
+        if abs(vector.y) > abs(vector.x):
+            hb_width, hb_height = hb_height, hb_width
+        self._init_hitbox((hb_width, hb_height), self.rect.center)
         is_colliding = pg.sprite.spritecollideany(
             self,
             self.sprite_groups['obstacles'], 

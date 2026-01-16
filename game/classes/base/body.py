@@ -34,7 +34,10 @@ class Body(HitboxSprite, ABC):
         self.pos = self.rect.center + self._remainder
 
     def _make_a_step(self, steps_to_do: pg.Vector2, axis_idx):
-        step = copysign(cfg.SUB_STEP, steps_to_do[axis_idx])
+        step = copysign(
+            min(abs(steps_to_do[axis_idx]), cfg.SUB_STEP_LIMIT),
+            steps_to_do[axis_idx]
+            )
         self.hitbox[axis_idx] += step
         collisions = pg.sprite.spritecollide(
             self,
@@ -46,16 +49,31 @@ class Body(HitboxSprite, ABC):
             steps_to_do[axis_idx] -= step
             self._remainder[axis_idx] -= step
         else:
-            self.hitbox[axis_idx] -= step
+            collidable = collisions[0]
+            if axis_idx == 0:
+                if step > 0:
+                    overlap = self.hitbox.right - collidable.hitbox.left
+                    self.hitbox.right = collidable.hitbox.left
+                else:
+                    overlap = self.hitbox.left - collidable.hitbox.right
+                    self.hitbox.left = collidable.hitbox.right
+            elif axis_idx == 1:
+                if step > 0:
+                    overlap = self.hitbox.bottom - collidable.hitbox.top
+                    self.hitbox.bottom = collidable.hitbox.top
+                else:
+                    overlap = self.hitbox.top - collidable.hitbox.bottom
+                    self.hitbox.top = collidable.hitbox.bottom
             action = self._handle_collision(collisions)
             match action:
                 case 'STOP':
                     steps_to_do[axis_idx] = 0
                     self._remainder[axis_idx] = 0
                 case 'BOUNCE':
-                    steps_to_do[axis_idx] *= -1
                     self.move_vec[axis_idx] *= -1
+                    steps_to_do[axis_idx] *= -1
                     self._remainder[axis_idx] *= -1
+                    self.hitbox[axis_idx] -= overlap
                 case 'DESTROY':
                     steps_to_do *= 0
                     self.kill()

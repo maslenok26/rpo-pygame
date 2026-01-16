@@ -3,7 +3,7 @@ from .types import Layers
 # ПАРАМЕТРЫ РАЗРЕШЕНИЯ
 GAME_WIDTH = 320
 GAME_HEIGHT = 240
-HEIGHTS = { 'HD': 720, 'FHD': 1080, 'QHD': 1440, 'UHD': 2160 }
+HEIGHTS = {'HD': 720, 'FHD': 1080, 'QHD': 1440, 'UHD': 2160}
 RESOLUTION = 'HD'
 START_SCREEN_WIDTH = HEIGHTS[RESOLUTION] * (16 / 9)
 START_SCREEN_HEIGHT = HEIGHTS[RESOLUTION]
@@ -20,7 +20,7 @@ LAYERS: Layers = {
 }
 
 # ПАРАМЕТРЫ ФИЗИКИ
-SUB_STEP = 1
+SUB_STEP_LIMIT = 10
 
 # ПАРАМЕТРЫ СМЕНЫ КАДРОВ
 FPS_LOCK = True

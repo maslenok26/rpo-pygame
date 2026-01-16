@@ -1,4 +1,5 @@
 from __future__ import annotations
+from math import copysign
 
 import pygame as pg
 
@@ -8,7 +9,7 @@ from .projectile import Projectile
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from .base import Entity
+    from . import Entity
 
 
 class Weapon(BaseSprite):
@@ -37,7 +38,7 @@ class Weapon(BaseSprite):
 
         self.timers = {
             'shoot': Timer(
-                duration=0, end_func=None, cooldown=400
+                duration=0, end_func=None, cooldown=300
             )
         }
 
@@ -88,7 +89,7 @@ class Weapon(BaseSprite):
                 image_to_rotate, flip_x=False, flip_y=True
                 )
         self.image = pg.transform.rotate(image_to_rotate, -angle)
-        layer_offset = 1 if angle >= 0 else -1
+        layer_offset = copysign(1, angle)
         new_layer = self._orig_layer + layer_offset
         if new_layer != self._layer:
             self.sprite_groups['rendering'].change_layer(self, new_layer)
