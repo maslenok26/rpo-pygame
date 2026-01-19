@@ -37,8 +37,11 @@ class Entity(Body, ABC):
     
     def die(self):
         self.is_dead = True
-        self.weapon.kill()
         self.kill()
+
+    def kill(self):
+        self.weapon.kill()
+        super().kill()
 
     def _handle_collision(self, _):
         return 'STOP'

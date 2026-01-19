@@ -1,4 +1,5 @@
 from __future__ import annotations
+from math import copysign
 
 from . import Entity
 from .weapon import Weapon
@@ -21,9 +22,10 @@ class Enemy(Entity):
         self.add_to_groups('rendering', 'enemies')
 
         self.hp = 100
-        self.speed = cfg.TILE_SIZE * 3
-        self.detection_radius = 120
-        self.shoot_radius = 100
+        self.speed = 45
+        self.detection_radius = 140
+        self.shoot_radius = 110
+        self.stop_radius = 60
 
         self.set_image(self.assets['enemy'])
 
@@ -54,13 +56,17 @@ class Enemy(Entity):
     def _follow_target(self):
         self_to_target_vec = self.target.pos - self.pos
         self.target_dist = self_to_target_vec.length()
-        if self.target_dist > self.detection_radius:
+        if not self.target_dist: return
+        is_too_far = self.target_dist > self.detection_radius
+        if is_too_far:
             self.move_vec *= 0
-            self.look_vec.update(1 if self.look_vec.x >= 0 else -1, 0)
-            return
-        self.move_vec = self_to_target_vec.normalize()
-        self.look_vec = self.move_vec.copy()
-
+            self.look_vec.update(copysign(1, self.look_vec.x), 0)
+        else:
+            normalized = self_to_target_vec.normalize()
+            is_too_close = self.target_dist <= self.stop_radius
+            self.move_vec = normalized * (not is_too_close)
+            self.look_vec = normalized
+            
     def _attack_target(self):
         if self.target_dist < self.shoot_radius:
             self.weapon.shoot()

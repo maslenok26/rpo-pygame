@@ -46,7 +46,7 @@ class Projectile(Body):
         )
         self._update_collidables()
 
-        self.move_vec = vector
+        self.move_vec = vector.copy()
         
         self.timers = {
             'lifetime': Timer(

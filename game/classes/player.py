@@ -13,9 +13,9 @@ class Player(Entity):
         self._layer = cfg.LAYERS['PLAYER']
         self.add_to_groups('rendering', 'player')
 
-        self.base_speed = cfg.TILE_SIZE * 8
+        self.base_speed = 135
         self.dash_speed = self.base_speed * 3
-        self.hp = 100
+        self.hp = float('inf')
         self.speed = self.base_speed
 
         self.set_image(self.assets['player'])

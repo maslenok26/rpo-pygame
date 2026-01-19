@@ -18,8 +18,11 @@ class Weapon(BaseSprite):
     proj_self_group_key: str
     proj_target_group_keys: tuple[str]
 
-    def __init__(self, sprite_groups, assets,
-                 owner: Entity, proj_self_group_key, proj_target_group_keys):
+    def __init__(
+            self,
+            sprite_groups, assets,
+            owner: Entity, proj_self_group_key, proj_target_group_keys
+            ):
         super().__init__(sprite_groups, assets, owner.rect.center)
 
         self._orig_layer = owner._layer
@@ -28,12 +31,12 @@ class Weapon(BaseSprite):
 
         self.orbit_offset = pg.Vector2(3, 4)
         self.muzzle_offset = pg.Vector2(18, -3)
-        self.cur_orbit_offset = self.orbit_offset.copy()
-        self.cur_muzzle_offset = self.muzzle_offset.copy()
+        self._cur_orbit_offset = self.orbit_offset.copy()
+        self._cur_muzzle_offset = self.muzzle_offset.copy()
 
         self.orig_image = self.assets['shotgun']
         self.image = self.set_image(self.orig_image)
-        self.vector = owner.look_vec.copy()
+        self.vector = owner.look_vec
         self.stable_angle = 0
 
         self.timers = {
@@ -56,12 +59,12 @@ class Weapon(BaseSprite):
 
     def shoot(self):
         if not self.timers['shoot'].start(): return
-        spawn_pos = self.rect.center + self.cur_muzzle_offset
+        spawn_pos = self.rect.center + self._cur_muzzle_offset
         Projectile(
             self.sprite_groups, 
             self.assets,
             spawn_pos,
-            self.vector.copy(),
+            self.vector,
             self.proj_self_group_key,
             self.proj_target_group_keys
         )
@@ -71,15 +74,15 @@ class Weapon(BaseSprite):
         cur_angle = self.vector.angle
         if abs(cur_angle) != 90:
             self.stable_angle = cur_angle
-        self.cur_orbit_offset = self.orbit_offset.copy()
-        self.cur_muzzle_offset = self.muzzle_offset.copy()
+        self._cur_orbit_offset = self.orbit_offset.copy()
+        self._cur_muzzle_offset = self.muzzle_offset.copy()
         should_flip = abs(self.stable_angle) > 90
         if should_flip:
-            self.cur_orbit_offset.y *= -1
-            self.cur_muzzle_offset.y *= -1
-        self.cur_orbit_offset.rotate_ip(cur_angle)
-        self.cur_muzzle_offset.rotate_ip(cur_angle)
-        self.rect.center += self.cur_orbit_offset
+            self._cur_orbit_offset.y *= -1
+            self._cur_muzzle_offset.y *= -1
+        self._cur_orbit_offset.rotate_ip(cur_angle)
+        self._cur_muzzle_offset.rotate_ip(cur_angle)
+        self.rect.center += self._cur_orbit_offset
 
     def _rotate_image(self):
         angle = self.vector.angle

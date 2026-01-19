@@ -16,7 +16,7 @@ def mainloop(gm: GameManager):
             if event.type == pg.QUIT:
                 running = False
             if event.type == pg.VIDEORESIZE:
-                gm.update_layout()
+                gm.resize()
         gm.update(dt)
         gm.draw()
         pg.display.flip()

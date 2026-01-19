@@ -4,11 +4,12 @@ from random import choice
 import pygame as pg
 
 from ..classes import Camera, Wall, Enemy, Player
+from ..utils import LevelGenerator
 from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import Layout, SpriteGroups, Assets
+    from ..types import SpriteGroups, Assets
 
 
 class GameManager:
@@ -24,7 +25,7 @@ class GameManager:
     
     def get_mouse_screen_pos(self):
         mouse_pos: pg.Vector2 = (
-            (pg.mouse.get_pos() - self.layout['offset']) / self.layout['scale']
+            (pg.mouse.get_pos() - self.layout.offset) / self.layout.scale
         )
         if cfg.LETTERBOXING:
             mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, cfg.GAME_WIDTH)
@@ -53,24 +54,18 @@ class GameManager:
         for sprite in self.sprite_groups['rendering']:
             self.game_surf.blit(sprite.image, sprite.rect.move(camera_offset))
         scaled_game_surf = pg.transform.scale(
-            self.game_surf, self.layout['size']
+            self.game_surf, self.layout.size
             )
-        self.screen.blit(scaled_game_surf, self.layout['offset'])
-    
-    def update_layout(self):
-        scales = (
-            self.screen.width / cfg.GAME_WIDTH, self.screen.height / cfg.GAME_HEIGHT
-            )
-        scale = min(scales) if cfg.LETTERBOXING else max(scales)
-        scaled_width = cfg.GAME_WIDTH * scale
-        scaled_height = cfg.GAME_HEIGHT * scale
-        offset_x = (self.screen.width - scaled_width) // 2
-        offset_y = (self.screen.height - scaled_height) // 2
-        self.layout['scale'] = scale
-        self.layout['offset'] = pg.Vector2(offset_x, offset_y)
-        self.layout['size'] = (int(scaled_width), int(scaled_height))
+        self.screen.blit(scaled_game_surf, self.layout.offset)
 
-    def init_level(self, level_map: list[str]=cfg.TEST_MAP):
+    def init_level(self, level_map: list[str]=None):
+        if not level_map:
+            level_map = LevelGenerator(
+                40, 40, floor_percent=0.3,
+                walkers_amount=1, walkers_min=1, walkers_max=2,
+                spawn_chance=0.05, death_chance=0.02, turn_chance=0.3,
+                enemy_amount=15
+                ).get_level()
         self.static_surf = pg.Surface(
             (len(level_map[0])*cfg.TILE_SIZE, len(level_map)*cfg.TILE_SIZE)
             )
@@ -79,7 +74,7 @@ class GameManager:
             sprite_group.empty()
         dynamic_objects = {'W': Wall, 'P': Player, 'E': Enemy}
         for row_idx, row in enumerate(level_map):
-            for tile_idx, tile in enumerate(row.split()):
+            for tile_idx, tile in enumerate(row):
                 y = row_idx * cfg.TILE_SIZE
                 x = tile_idx * cfg.TILE_SIZE
                 self.static_surf.blit(choice(self.assets['floor']), (x, y))
@@ -92,17 +87,17 @@ class GameManager:
                 if ObjectClass is Player: player = new_object
         self._init_player(player)
 
+    def resize(self):
+        self.layout.update(self.screen.size)
+
     def _init_display(self):
         display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
         self.screen = pg.display.set_mode(
-            (cfg.START_SCREEN_WIDTH, cfg.START_SCREEN_HEIGHT),
-            flags=display_flags,
-            vsync=1
+            cfg.START_SCREEN_SIZE, flags=display_flags, vsync=1
             )
         self.game_surf = pg.Surface((cfg.GAME_WIDTH, cfg.GAME_HEIGHT))
-        self.layout: Layout = {}
-        self.update_layout()
-
+        self.layout = Layout(self.screen.size)
+    
     def _init_assets(self):
         wall_face = pg.image.load('assets\\wall_face.png')
         shading = pg.Surface(wall_face.size)
@@ -148,3 +143,23 @@ class GameManager:
         self.player = player
         for enemy in self.sprite_groups['enemies']:
             enemy.target = player
+
+
+class Layout:
+    def __init__(self, screen_size):
+        self.offset = pg.Vector2()
+        self.update(screen_size)
+    
+    def update(self, screen_size):
+        screen_width, screen_height = screen_size
+        scales = (
+            screen_width / cfg.GAME_WIDTH, screen_height / cfg.GAME_HEIGHT
+            )
+        scale = min(scales) if cfg.LETTERBOXING else max(scales)
+        scaled_width = cfg.GAME_WIDTH * scale
+        scaled_height = cfg.GAME_HEIGHT * scale
+        offset_x = (screen_width - scaled_width) // 2
+        offset_y = (screen_height - scaled_height) // 2
+        self.scale = scale
+        self.offset.update(offset_x, offset_y)
+        self.size = (int(scaled_width), int(scaled_height))

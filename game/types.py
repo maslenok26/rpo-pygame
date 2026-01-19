@@ -32,9 +32,3 @@ class Assets(TypedDict):
     enemy: pg.Surface
     shotgun: pg.Surface
     projectile: pg.Surface
-
-
-class Layout(TypedDict):
-    scale: float
-    offset: pg.Vector2
-    size: tuple[int, int]
