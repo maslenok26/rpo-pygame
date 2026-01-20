@@ -27,25 +27,26 @@ class Enemy(Entity):
         self.shoot_radius = 110
         self.stop_radius = 60
 
-        self.set_image(self.assets['enemy'])
+        self.set_image(self._assets['enemy'])
 
-        self._init_hitbox((10, 10), pos)
+        self._init_hitbox((10, 14), pos)
 
-        self.target = None
-        self.target_dist = 0
         self.weapon = Weapon(
-            sprite_groups, assets, 
+            sprite_groups, assets, 'pistol',
             owner=self,
             proj_self_group_key='enemy_projectiles',
             proj_target_group_keys=('player',)
         )
+
+        self.target = None
+        self.target_dist = 0
 
     def update(self, dt):
         if self.target:
             self._follow_target()
         self._move(dt)
         if self.target:
-            self.weapon.update(self.look_vec)
+            self.weapon.update()
             self._attack_target()
         self.animate()
 
@@ -65,7 +66,7 @@ class Enemy(Entity):
             normalized = self_to_target_vec.normalize()
             is_too_close = self.target_dist <= self.stop_radius
             self.move_vec = normalized * (not is_too_close)
-            self.look_vec = normalized
+            self.look_vec.update(normalized)
             
     def _attack_target(self):
         if self.target_dist < self.shoot_radius:

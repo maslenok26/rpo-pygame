@@ -9,16 +9,16 @@ if TYPE_CHECKING:
 
 
 class BaseSprite(pg.sprite.Sprite, ABC):
-    sprite_groups: SpriteGroups
-    assets: Assets
+    _sprite_groups: SpriteGroups
+    _assets: Assets
     _layer: int | None
     image: pg.Surface | None
 
     def __init__(self, sprite_groups, assets, pos):
         super().__init__()
 
-        self.sprite_groups = sprite_groups
-        self.assets = assets
+        self._sprite_groups = sprite_groups
+        self._assets = assets
 
         self._layer = None
 
@@ -29,7 +29,7 @@ class BaseSprite(pg.sprite.Sprite, ABC):
         self.image = image
         self.rect = image.get_rect(center=self.rect.center)
 
-    def add_to_groups(self, *names):
-        for name in names:
-            sprite_group: pg.sprite.AbstractGroup = self.sprite_groups[name]
+    def add_to_groups(self, *keys):
+        for key in keys:
+            sprite_group: pg.sprite.AbstractGroup = self._sprite_groups[key]
             sprite_group.add(self)

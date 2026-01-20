@@ -23,7 +23,7 @@ class Entity(Body, ABC):
 
         self.image_flipped = False
 
-        self.collidables = self.sprite_groups['obstacles']
+        self.collidables = self._sprite_groups['obstacles']
 
         self.look_vec = pg.Vector2(1, 0)
 
@@ -47,8 +47,8 @@ class Entity(Body, ABC):
         return 'STOP'
 
     def _flip_image(self):
-        if ((self.look_vec.x < 0 and not self.image_flipped)
-            or (self.look_vec.x > 0 and self.image_flipped)):
+        should_flip = self.look_vec.x < 0
+        if should_flip != self.image_flipped:
             self.image = pg.transform.flip(
                 self.image, flip_x=True, flip_y=False
                 )

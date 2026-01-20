@@ -3,7 +3,7 @@ import pygame as pg
 
 class Timer:
     def __init__(
-            self, duration, end_func, cooldown, can_overlap=False
+            self, duration=0, end_func=None, cooldown=0, can_overlap=False
             ):
         self.duration = duration
         self.end_func = end_func

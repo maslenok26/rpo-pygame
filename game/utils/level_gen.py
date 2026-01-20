@@ -7,6 +7,8 @@ from .. import config as cfg
 
 
 class LevelGenerator:
+    SAFE_LAYER = 4
+
     def __init__(
             self,
             width, height, floor_percent,
@@ -14,8 +16,8 @@ class LevelGenerator:
             spawn_chance, death_chance, turn_chance,
             enemy_amount
             ):
-        self.width = width + 6
-        self.height = height + 6
+        self.width = width + self.SAFE_LAYER * 2
+        self.height = height + self.SAFE_LAYER * 2
         self.floor_percent = floor_percent
 
         self.walkers_amount = walkers_amount
@@ -48,7 +50,8 @@ class LevelGenerator:
             walker.move()
             pos_x = int(walker.pos.x)
             pos_y = int(walker.pos.y)
-            if not (4 < pos_x < self.width-5 and 4 < pos_y < self.height-5):
+            if not (self.SAFE_LAYER+1 < pos_x < self.width-self.SAFE_LAYER-2
+                    and self.SAFE_LAYER+1 < pos_y < self.height-self.SAFE_LAYER-2):
                 walker.bounce()
                 continue
             vector = walker.vector
@@ -100,9 +103,9 @@ class LevelGenerator:
             if dist(tile_pos, player_pos) > SAFE_RADIUS_TILES
             ]
         if not enemy_pos_candidates: return
-        for _ in range(self.enemy_amount):
-            enemy_pos = choice(enemy_pos_candidates)
-            enemy_pos_candidates.remove(enemy_pos)
+        actual_enemy_amount = min(self.enemy_amount, len(enemy_pos_candidates))
+        enemy_positions = sample(enemy_pos_candidates, actual_enemy_amount)
+        for enemy_pos in enemy_positions:
             self._map_data[enemy_pos[1]][enemy_pos[0]] = 'E'
     
 

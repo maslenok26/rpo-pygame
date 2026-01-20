@@ -10,39 +10,47 @@ from .. import config as cfg
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import HitboxSprite, Entity
+    from ..types import DynamicProjectileStats
 
 
 class Projectile(Body):
     target_groups: tuple[pg.sprite.Group]
     collidables: tuple[HitboxSprite]
 
-    def __init__(self, sprite_groups, assets, pos,
-                 vector: pg.Vector2, self_group_key, target_group_keys):
+    def __init__(
+            self, sprite_groups, assets, pos,
+            type_key,
+            vector: pg.Vector2,
+            self_group_key, target_group_keys,
+            dynamic_stats: DynamicProjectileStats
+            ):
         super().__init__(sprite_groups, assets, pos)
 
         self._layer = cfg.LAYERS['PROJECTILE']
         self.add_to_groups('rendering', self_group_key)
 
-        self.speed = 180
-        self.damage = 20
+        static_stats = cfg.PROJECTILE_STATS[type_key]
 
-        self.orig_image = self.assets['projectile']
+        self.speed = dynamic_stats['speed']
+        self.damage = dynamic_stats['damage']
+
+        self.orig_image = self._assets[type_key]
         self.set_image(pg.transform.rotate(self.orig_image, -vector.angle))
         
-        hb_width, hb_height = 8, 6
+        hb_width, hb_height = static_stats['hitbox_size']
         if abs(vector.y) > abs(vector.x):
             hb_width, hb_height = hb_height, hb_width
         self._init_hitbox((hb_width, hb_height), self.rect.center)
         is_colliding = pg.sprite.spritecollideany(
             self,
-            self.sprite_groups['obstacles'], 
+            self._sprite_groups['obstacles'], 
             collided=self._check_hitbox_collision
             )
         if is_colliding:
             self.kill()
             return
         self.target_groups = tuple(
-            self.sprite_groups[key] for key in target_group_keys
+            self._sprite_groups[key] for key in target_group_keys
         )
         self._update_collidables()
 
@@ -50,7 +58,7 @@ class Projectile(Body):
         
         self.timers = {
             'lifetime': Timer(
-                duration=3000, end_func=self.kill, cooldown=0
+                duration=dynamic_stats['lifetime'], end_func=self.kill
             )
         }
         self.timers['lifetime'].start()
@@ -62,7 +70,7 @@ class Projectile(Body):
     
     def _update_collidables(self):
         self.collidables = tuple(
-            chain(self.sprite_groups['obstacles'], *self.target_groups)
+            chain(self._sprite_groups['obstacles'], *self.target_groups)
             )
     
     def _handle_collision(self, collisions):
