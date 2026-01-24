@@ -3,18 +3,18 @@ from .. import config as cfg
 
 
 class Wall(HitboxSprite):
-    def __init__(self, sprite_groups, assets, pos, image_idx, needs_face):
-        super().__init__(sprite_groups, assets, pos)
+    def __init__(self, sprite_groups, assets, pos, depth, needs_face):
+        stats = cfg.WALL
+        self.image_idx = depth
 
-        Y_OFFSET = self._assets['walls']['face'].height // 2
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self._layer = cfg.LAYERS['WALL_TOP']
-        self.add_to_groups('rendering', 'obstacles')
+        Y_OFFSET = self._assets['walls']['face'][0].height // 2
 
-        self.set_image(self._assets['walls']['tops'][image_idx])
+        self._layer = cfg.LAYERS['wall_top']
+        self._add_to_groups('rendering', 'obstacles')
+
         self.rect.centery -= Y_OFFSET
-
-        self._init_hitbox((cfg.TILE_SIZE, cfg.TILE_SIZE), pos)
 
         if needs_face:
             self.face = WallFace(
@@ -29,9 +29,9 @@ class Wall(HitboxSprite):
 
 class WallFace(BaseSprite):
     def __init__(self, sprite_groups, assets, pos):
-        super().__init__(sprite_groups, assets, pos)
+        stats = cfg.WALL_FACE
 
-        self._layer = cfg.LAYERS['WALL_FACE']
-        self.add_to_groups('rendering')
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self.set_image(self._assets['walls']['face'])
+        self._layer = cfg.LAYERS['wall_face']
+        self._add_to_groups('rendering')

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TypedDict, TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict, NotRequired
 
 import pygame as pg
 
@@ -19,53 +19,63 @@ class SpriteGroups(TypedDict):
 
 class WallAssets(TypedDict):
     tops: list[pg.Surface]
-    face: pg.Surface
-
+    face: list[pg.Surface]
 
 class Assets(TypedDict):
     floor: list[pg.Surface]
     walls: WallAssets
-    player: pg.Surface
-    enemy: pg.Surface
-    pistol: pg.Surface
-    shotgun: pg.Surface
-    projectile: pg.Surface
+    player: list[pg.Surface]
+    enemy: list[pg.Surface]
+    pistol: list[pg.Surface]
+    shotgun: list[pg.Surface]
+    projectile: list[pg.Surface]
 
 
-# ТИПЫ ДЛЯ CONFIG.PY
+# ТИПЫ ДЛЯ CONFIG/
 class Layers(TypedDict):
-    WALL_FACE: int
-    ENEMY: int
-    PLAYER: int
-    PROJECTILE: int
-    WALL_TOP: int
+    wall_face: int
+    enemy: int
+    player: int
+    projectile: int
+    wall_top: int
 
 
-class CombatRule(TypedDict):
+class FactionRule(TypedDict):
     proj_self_group_key: str
     proj_target_group_keys: tuple[str]
 
-CombatRules = dict[str, CombatRule] 
 
+class GeneralStats(TypedDict):
+    # entity
+    faction: NotRequired[str]
+    hp: NotRequired[int]
+    # enemy
+    detection_radius: NotRequired[int]
+    shoot_radius: NotRequired[int]
+    stop_radius: NotRequired[int]
+    # weapon
+    cooldown: NotRequired[int]
+    proj_stats: NotRequired[Stats]
+    
+class PhysicsStats(TypedDict):
+    # hitboxsprite
+    hitbox_size: NotRequired[tuple[int, int]]
+    # body
+    speed: NotRequired[float]
+    # player
+    dash_speed: NotRequired[float]
 
-class StaticProjectileStats(TypedDict):
-    hitbox_size: tuple[int, int]
+class RenderStats(TypedDict):
+    asset_path: NotRequired[str]
 
-ProjectileStats = dict[str, StaticProjectileStats]
+class ComponentsStats(TypedDict):
+    timers: NotRequired[dict[str, dict[str, int]]]
+    start_weapon_keys: NotRequired[tuple[str]]
 
+class Stats(TypedDict):
+    general: NotRequired[GeneralStats]
+    physics: NotRequired[PhysicsStats]
+    render: NotRequired[RenderStats]
+    components: NotRequired[ComponentsStats]
 
-class DynamicProjectileStats(TypedDict):
-    speed: float
-    damage: float
-    lifetime: int
-
-
-class SingleWeaponStats(TypedDict):
-    cooldown: int
-    orbit_offset: tuple[int, int]
-    muzzle_offset: tuple[int, int]
-    holstered_offset: tuple[int, int]
-    proj_type_key: str
-    proj_stats: DynamicProjectileStats
-
-WeaponStats = dict[str, SingleWeaponStats]
+StatsDict = dict[str, Stats]  

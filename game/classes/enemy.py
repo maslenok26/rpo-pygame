@@ -3,9 +3,8 @@ from math import copysign
 
 from . import Entity
 from .weapon import Weapon
+from .timer import Timer
 from .. import config as cfg
-
-import pygame as pg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -13,35 +12,32 @@ if TYPE_CHECKING:
 
 
 class Enemy(Entity):
+    _layer = cfg.LAYERS['enemy']
     target: Player | None
 
     def __init__(self, sprite_groups, assets, pos):
-        super().__init__(sprite_groups, assets, pos)
+        stats = cfg.ENEMIES['enemy']
 
-        self._layer = cfg.LAYERS['ENEMY']
-        self.add_to_groups('rendering', 'enemies')
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self.hp = 100
-        self.speed = 45
-        self.detection_radius = 140
-        self.shoot_radius = 110
-        self.stop_radius = 60
+        self._add_to_groups('rendering', 'enemies')
 
-        self.set_image(self._assets['enemy'])
+        general = stats['general']
+        self.detection_radius = general['detection_radius']
+        self.shoot_radius = general['shoot_radius']
+        self.stop_radius = general['stop_radius']
 
-        self._init_hitbox((10, 14), pos)
+        self._add_weapons(Weapon, stats['components']['start_weapon_keys'])
 
-        self.weapon = Weapon(
-            sprite_groups, assets, 'pistol',
-            owner=self,
-            proj_self_group_key='enemy_projectiles',
-            proj_target_group_keys=('player',)
-        )
+        self.timers = {
+            'shoot': Timer(**stats['components']['timers']['shoot'])
+        }
 
         self.target = None
         self.target_dist = 0
 
     def update(self, dt):
+        self.timers['shoot'].update()
         if self.target:
             self._follow_target()
         self._move(dt)
@@ -69,5 +65,6 @@ class Enemy(Entity):
             self.look_vec.update(normalized)
             
     def _attack_target(self):
-        if self.target_dist < self.shoot_radius:
+        if (self.target_dist < self.shoot_radius and
+            self.timers['shoot'].start()):
             self.weapon.shoot()

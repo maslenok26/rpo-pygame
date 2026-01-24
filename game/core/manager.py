@@ -4,7 +4,7 @@ from random import choice
 import pygame as pg
 
 from ..classes import Camera, Wall, Enemy, Player
-from ..utils import LevelGenerator, Loader
+from ..utils import LevelGenerator, loader
 from .. import config as cfg
 
 from typing import TYPE_CHECKING
@@ -35,7 +35,7 @@ class GameManager:
         return screen_pos
     
     def update(self, dt):
-        if self.player.is_dead: return
+        if not self.player.alive(): return
         self.player.update_movement(dt)
         self._sprite_groups['enemies'].update(dt)
         self._sprite_groups['player_projectiles'].update(dt)
@@ -63,7 +63,7 @@ class GameManager:
             level_map = LevelGenerator(
                 width=40, height=40, floor_percent=0.3,
                 walkers_amount=1, walkers_min=1, walkers_max=2,
-                spawn_chance=0.05, death_chance=0.02, turn_chance=0.15,
+                spawn_chance=0.05, death_chance=0.02, turn_chance=0.2,
                 enemy_amount=15
                 ).get_level()
         width = len(level_map[0])
@@ -86,8 +86,8 @@ class GameManager:
                     player = Player(*context)
                 elif tile == 'W':
                     needs_face = not (row_idx + 1 >= len(level_map))
-                    image_idx = min(depths.get((tile_idx, row_idx), 0), 2)
-                    Wall(*context, image_idx, needs_face)
+                    depth = min(depths[(tile_idx, row_idx)], 2)
+                    Wall(*context, depth, needs_face)
                 elif tile == 'E':
                     Enemy(*context)
         self._init_player(player)
@@ -104,7 +104,6 @@ class GameManager:
         self.layout = Layout(self.screen.size)
     
     def _init_assets(self):
-        loader = Loader()
         self._assets: Assets = {
             'floor': loader.load_folder('assets/grass'),
             'walls': {
@@ -112,9 +111,9 @@ class GameManager:
                 'face': loader.load_image('assets/walls/wall_face.png')
             },
             'player': loader.load_image('assets/player.png'),
-            'enemy': pg.transform.scale(
-                loader.load_image('assets/enemy.png'), (14, 14)
-                ),
+            'enemy': [pg.transform.scale(
+                loader.load_image('assets/enemy.png')[0], (14, 14)
+                )],
             'pistol': loader.load_image('assets/pistol.png'),
             'shotgun': loader.load_image('assets/shotgun.png'),
             'projectile': loader.load_image(
@@ -150,9 +149,9 @@ class GameManager:
         while queue:
             x, y = queue.popleft()
             depth = depths[(x, y)]
-            for direction in ((0, 1), (1, 0), (0, -1), (-1, 0)):
-                cur_x = x + direction[0]
-                cur_y = y + direction[1]
+            for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0)):
+                cur_x = x + dx
+                cur_y = y + dy
                 if (not (0 <= cur_x < width and 0 <= cur_y < height)
                     or (cur_x, cur_y) in depths):
                     continue

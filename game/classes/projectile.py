@@ -10,56 +10,47 @@ from .. import config as cfg
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import HitboxSprite, Entity
-    from ..types import DynamicProjectileStats
+    from ..types import Stats, FactionRule
 
 
 class Projectile(Body):
+    _layer = cfg.LAYERS['projectile']
     target_groups: tuple[pg.sprite.Group]
     collidables: tuple[HitboxSprite]
 
     def __init__(
-            self, sprite_groups, assets, pos,
-            type_key,
+            self, sprite_groups, assets, pos, stats: Stats,
             vector: pg.Vector2,
-            self_group_key, target_group_keys,
-            dynamic_stats: DynamicProjectileStats
+            faction_rule: FactionRule
             ):
-        super().__init__(sprite_groups, assets, pos)
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self._layer = cfg.LAYERS['PROJECTILE']
-        self.add_to_groups('rendering', self_group_key)
+        self._add_to_groups('rendering', faction_rule['proj_self_group_key'])
 
-        static_stats = cfg.PROJECTILE_STATS[type_key]
-
-        self.speed = dynamic_stats['speed']
-        self.damage = dynamic_stats['damage']
-
-        self.orig_image = self._assets[type_key]
-        self.set_image(pg.transform.rotate(self.orig_image, -vector.angle))
+        general = stats['general']
+        self.damage = general['damage']
         
-        hb_width, hb_height = static_stats['hitbox_size']
-        if abs(vector.y) > abs(vector.x):
-            hb_width, hb_height = hb_height, hb_width
-        self._init_hitbox((hb_width, hb_height), self.rect.center)
-        is_colliding = pg.sprite.spritecollideany(
+        is_inside_obstacle = pg.sprite.spritecollideany(
             self,
             self._sprite_groups['obstacles'], 
             collided=self._check_hitbox_collision
             )
-        if is_colliding:
+        if is_inside_obstacle:
             self.kill()
             return
         self.target_groups = tuple(
-            self._sprite_groups[key] for key in target_group_keys
+            self._sprite_groups[key]
+            for key in faction_rule['proj_target_group_keys']
         )
         self._update_collidables()
+        self.move_vec.update(vector)
 
-        self.move_vec = vector.copy()
+        self._set_image(pg.transform.rotate(self.image, -vector.angle))
         
         self.timers = {
             'lifetime': Timer(
-                duration=dynamic_stats['lifetime'], end_func=self.kill
-            )
+                **stats['components']['timers']['lifetime'], end_func=self.kill
+                )
         }
         self.timers['lifetime'].start()
     

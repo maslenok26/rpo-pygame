@@ -15,48 +15,35 @@ if TYPE_CHECKING:
 
 class Weapon(BaseSprite):
     orig_image: pg.Surface
-    image: pg.Surface
-    owner: Entity
-    proj_self_group_key: str
-    proj_target_group_keys: tuple[str]
 
-    def __init__(
-            self,
-            sprite_groups, assets,
-            type_key,
-            owner: Entity, faction,
-            ):
-        super().__init__(sprite_groups, assets, owner.rect.center)
+    def __init__(self, sprite_groups, assets, type_key, owner: Entity):
+        stats = cfg.WEAPONS[type_key]
+        
+        super().__init__(sprite_groups, assets, owner.rect.center, stats)
 
-        self._orig_layer = owner._layer
-        self._layer = self._orig_layer
-        self.add_to_groups('rendering')
-
-        stats = cfg.WEAPON_STATS[type_key]
-
-        self.orbit_offset = pg.Vector2(stats['orbit_offset'])
-        self.muzzle_offset = pg.Vector2(stats['muzzle_offset'])
-        self._cur_orbit_offset = self.orbit_offset.copy()
-        self._cur_muzzle_offset = self.muzzle_offset.copy()
-        self.holstered_offset = pg.Vector2(stats['holstered_offset'])
+        self.owner = owner
+        self.faction_rule = cfg.FACTION_RULES[owner.faction]
+        general = stats['general']
+        self.proj_stats = general['proj_stats']
+        self.orbit_offset = pg.Vector2(general['orbit_offset'])
+        self.muzzle_offset = pg.Vector2(general['muzzle_offset'])
+        self.holstered_offset = pg.Vector2(general['holstered_offset'])
         self.holstered_angle = -110
         self.is_active = True
 
-        self.orig_image = self._assets[type_key]
+        self._orig_layer = owner._layer
+        self._layer = self._orig_layer
+        self._add_to_groups('rendering')
+
+        self.vector = owner.look_vec
+        
         self.holstered_image = pg.transform.rotate(
             self.orig_image, -self.holstered_angle
             )
-        self.set_image(self.orig_image)
-        self.vector = owner.look_vec
 
         self.timers = {
-            'shoot': Timer(cooldown=stats['cooldown'])
+            'shoot': Timer(**stats['components']['timers']['shoot'])
         }
-
-        self.owner = owner
-        self.combat_rules = cfg.COMBAT_RULES[faction]
-        self.proj_type_key = stats['proj_type_key']
-        self.proj_stats = stats['proj_stats']
 
     def update(self):
         self._sync_with_owner()
@@ -86,12 +73,9 @@ class Weapon(BaseSprite):
         if not self.timers['shoot'].start(): return
         spawn_pos = self.rect.center + self._cur_muzzle_offset
         Projectile(
-            self._sprite_groups, self._assets, spawn_pos,
-            self.proj_type_key,
+            self._sprite_groups, self._assets, spawn_pos, self.proj_stats,
             self.vector,
-            self.combat_rules['proj_self_group_key'],
-            self.combat_rules['proj_target_group_keys'],
-            self.proj_stats
+            self.faction_rule
         )
 
     def _sync_with_owner(self):
@@ -117,7 +101,7 @@ class Weapon(BaseSprite):
                 )
         else:
             image_to_rotate = self.orig_image
-        self.set_image(pg.transform.rotate(image_to_rotate, -angle))
+        self._set_image(pg.transform.rotate(image_to_rotate, -angle))
         layer_offset = copysign(1, angle)
         new_layer = self._orig_layer + layer_offset
         if new_layer != self._layer:
@@ -126,10 +110,10 @@ class Weapon(BaseSprite):
     def _rotate_image_holstered(self):
         offset = self.holstered_offset.copy()
         if self.owner.image_flipped:
-            self.set_image(pg.transform.flip(
+            self._set_image(pg.transform.flip(
                 self.holstered_image, flip_x=True, flip_y=False
                 ))
             offset.x *= -1
         else:
-            self.set_image(self.holstered_image)
+            self._set_image(self.holstered_image)
         self.rect.center += offset

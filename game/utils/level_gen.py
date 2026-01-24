@@ -1,4 +1,4 @@
-from math import dist
+from math import dist, copysign
 from random import random, choice, sample
 
 import pygame as pg
@@ -78,26 +78,24 @@ class LevelGenerator:
 
     def _spawn_objects(self):
         _floor_tiles_amount = len(self._floor_tiles)
-        avg_x = sum(pos[0] for pos in self._floor_tiles) / _floor_tiles_amount
-        avg_y = sum(pos[1] for pos in self._floor_tiles) / _floor_tiles_amount
-        center = (int(avg_x), int(avg_y))
+        positions_x, positions_y = zip(*self._floor_tiles)
+        center = (
+            sum(positions_x) / _floor_tiles_amount,
+            sum(positions_y) / _floor_tiles_amount
+        )
         most_distant = max(self._floor_tiles, key=lambda pos: dist(pos, center))
         x, y = most_distant
+        OFFSET = 2
         if abs(x - center[0]) > abs(y - center[1]):
-            if x < center[0]:
-                player_pos = (x - 2, y)
-            else:
-                player_pos = (x + 2, y)
+            player_pos = (x+int(copysign(OFFSET, x-center[0])), y)
         else:
-            if y < center[1]:
-                player_pos = (x, y - 2)
-            else:
-                player_pos = (x, y + 2)
+            player_pos = (x, y+int(copysign(OFFSET, y-center[1])))
         for y in range(player_pos[1]-1, player_pos[1]+2):
             for x in range(player_pos[0]-1, player_pos[0]+2):
                 self._carve_floor(x, y)
         self._map_data[player_pos[1]][player_pos[0]] = 'P'
-        SAFE_RADIUS_TILES = (120 / cfg.TILE_SIZE) + 2 # 120 -- Enemy.detection_radius
+        SAFE_RADIUS_TILES = (
+            cfg.ENEMIES['enemy']['general']['detection_radius'] / cfg.TILE_SIZE) + 2
         enemy_pos_candidates = [
             tile_pos for tile_pos in self._floor_tiles
             if dist(tile_pos, player_pos) > SAFE_RADIUS_TILES

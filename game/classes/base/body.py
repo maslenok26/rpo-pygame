@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 from math import copysign
 
@@ -6,19 +7,22 @@ import pygame as pg
 from .hitbox_sprite import HitboxSprite
 from ... import config as cfg
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...types import Stats
+
 
 class Body(HitboxSprite, ABC):
     collidables: pg.sprite.Group[HitboxSprite] | tuple[HitboxSprite]
-    pos: pg.Vector2
     
-    def __init__(self, sprite_groups, assets, pos):
-        super().__init__(sprite_groups, assets, pos)
+    def __init__(self, sprite_groups, assets, pos, stats: Stats):
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self.speed = 0
+        self.speed = stats['physics']['speed']
 
         self.collidables = None
         
-        self.pos = pg.Vector2(pos)
+        self.pos = pg.Vector2(*pos)
         self.move_vec = pg.Vector2()
         self._remainder = pg.Vector2()
 
@@ -50,20 +54,10 @@ class Body(HitboxSprite, ABC):
             self._remainder[axis_idx] -= step
         else:
             collidable = collisions[0]
-            if axis_idx == 0:
-                if step > 0:
-                    overlap = self.hitbox.right - collidable.hitbox.left
-                    self.hitbox.right = collidable.hitbox.left
-                else:
-                    overlap = self.hitbox.left - collidable.hitbox.right
-                    self.hitbox.left = collidable.hitbox.right
-            elif axis_idx == 1:
-                if step > 0:
-                    overlap = self.hitbox.bottom - collidable.hitbox.top
-                    self.hitbox.bottom = collidable.hitbox.top
-                else:
-                    overlap = self.hitbox.top - collidable.hitbox.bottom
-                    self.hitbox.top = collidable.hitbox.bottom
+            overlap = copysign(
+                self.hitbox.clip(collidable.hitbox)[2+axis_idx], step
+            )
+            self.hitbox[axis_idx] -= overlap
             action = self._handle_collision(collisions)
             match action:
                 case 'STOP':

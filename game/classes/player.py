@@ -8,32 +8,20 @@ from .. import config as cfg
 
 
 class Player(Entity):
+    _layer = cfg.LAYERS['player']
+
     def __init__(self, sprite_groups, assets, pos):
-        super().__init__(sprite_groups, assets, pos)
+        stats = cfg.PLAYER
 
-        self._layer = cfg.LAYERS['PLAYER']
-        self.add_to_groups('rendering', 'player')
+        super().__init__(sprite_groups, assets, pos, stats)
 
-        self.base_speed = 135
-        self.dash_speed = 300
-        self.hp = float('inf')
-        self.speed = self.base_speed
+        self._add_to_groups('rendering', 'player')
 
-        self.set_image(self._assets['player'])
-
-        self._init_hitbox((10, 14), self.rect.center)
+        physics = stats['physics']
+        self.base_speed = physics['speed']
+        self.dash_speed = physics['dash_speed']
         
-        starting_loadout_keys = ('pistol', 'shotgun')
-        self.weapons = [
-                Weapon(
-                    sprite_groups, assets,
-                    key,
-                    owner=self, faction='player'
-                )
-                for key in starting_loadout_keys
-                ]
-        self.weapon = self.weapons[0]
-        self.weapons[1].unequip()
+        self._add_weapons(Weapon, stats['components']['start_weapon_keys'])
 
         self.timers = {'dash': Timer(
             duration=150, end_func=self._stop_dash, cooldown=500

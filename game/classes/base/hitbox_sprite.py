@@ -5,21 +5,20 @@ import pygame as pg
 
 from .base_sprite import BaseSprite
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ...types import Stats
+
 
 class HitboxSprite(BaseSprite, ABC):
-    hitbox: pg.Rect
+    def __init__(self, sprite_groups, assets, pos, stats: Stats):
+        super().__init__(sprite_groups, assets, pos, stats)
 
-    def __init__(self, sprite_groups, assets, pos):
-        super().__init__(sprite_groups, assets, pos)
-
-        self.hitbox = None
+        self.hitbox = pg.Rect(0, 0, *stats['physics']['hitbox_size'])
+        self.hitbox.center = pos
 
     def _check_hitbox_collision(
             self, sprite: HitboxSprite, collidable: HitboxSprite
             ):
         is_colliding = sprite.hitbox.colliderect(collidable.hitbox)
         return is_colliding
-    
-    def _init_hitbox(self, size, pos):
-        self.hitbox = pg.Rect(0, 0, *size)
-        self.hitbox.center = pos

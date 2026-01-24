@@ -2,18 +2,21 @@ from pathlib import Path
 
 import pygame as pg
 
-class Loader:
-    def load_folder(self, path):
-        folder = []
-        for file in sorted(Path(path).glob('*.png')):
-            image = self.load_image(file)
-            folder.append(image)
-        return folder
 
-    def load_image(self, file):
-        image = pg.image.load(file)
-        if image.get_alpha() is not None:
-            image = image.convert_alpha()
-        else:
-            image = image.convert()
-        return image
+def load_folder(path):
+    folder = tuple(
+        _load_surface(file)
+        for file in sorted(Path(path).glob('*.png'))
+    )
+    return folder
+
+def load_image(file):
+    return (_load_surface(file),)
+
+def _load_surface(file):
+    surf = pg.image.load(file)
+    if surf.get_alpha() is not None:
+        surf = surf.convert_alpha()
+    else:
+        surf = surf.convert()
+    return surf
