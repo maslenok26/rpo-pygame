@@ -40,6 +40,7 @@ class GameManager:
         self._sprite_groups['enemies'].update(dt)
         self._sprite_groups['player_projectiles'].update(dt)
         self._sprite_groups['enemy_projectiles'].update(dt)
+        if not self.player.alive(): return
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
@@ -69,9 +70,9 @@ class GameManager:
         width = len(level_map[0])
         height = len(level_map)
         depths = self._get_wall_depths(level_map, (width, height))
-        self.static_surf = pg.Surface((
-            (width - 1) * cfg.TILE_SIZE, (height - 1) * cfg.TILE_SIZE
-             ))
+        self.static_surf = pg.Surface(
+            ((width-1)*cfg.TILE_SIZE, (height-1)*cfg.TILE_SIZE)
+            )
         sprite_group: pg.sprite.AbstractGroup
         for sprite_group in self._sprite_groups.values():
             sprite_group.empty()
@@ -105,18 +106,19 @@ class GameManager:
     
     def _init_assets(self):
         self._assets: Assets = {
+            'shadows': {},
             'floor': loader.load_folder('assets/grass'),
             'walls': {
                 'tops': loader.load_folder('assets/walls/tops'),
-                'face': loader.load_image('assets/walls/wall_face.png')
+                'face': loader.load_asset('assets/walls/wall_face.png')
             },
-            'player': loader.load_image('assets/player.png'),
+            'player': loader.load_asset('assets/player.png'),
             'enemy': [pg.transform.scale(
-                loader.load_image('assets/enemy.png')[0], (14, 14)
+                loader.load_asset('assets/enemy.png')[0], (14, 14)
                 )],
-            'pistol': loader.load_image('assets/pistol.png'),
-            'shotgun': loader.load_image('assets/shotgun.png'),
-            'projectile': loader.load_image(
+            'pistol': loader.load_asset('assets/pistol.png'),
+            'shotgun': loader.load_asset('assets/shotgun.png'),
+            'projectile': loader.load_asset(
                 'assets/projectile.png'
                 )
         }

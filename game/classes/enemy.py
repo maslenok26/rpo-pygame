@@ -41,8 +41,9 @@ class Enemy(Entity):
         if self.target:
             self._follow_target()
         self._move(dt)
+        self.shadow.update()
+        self.weapon.update()
         if self.target:
-            self.weapon.update()
             self._attack_target()
         self.animate()
 

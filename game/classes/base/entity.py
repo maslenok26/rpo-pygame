@@ -3,7 +3,10 @@ from abc import ABC
 
 import pygame as pg
 
+from .base_sprite import BaseSprite
 from .body import Body
+from ...utils import generate_entity_shadow
+from ... import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -12,7 +15,6 @@ if TYPE_CHECKING:
 
 
 class Entity(Body, ABC):
-    has_shadow = True
     image_flipped = False
     weapons: list[Weapon]
     weapon: Weapon = None
@@ -27,6 +29,11 @@ class Entity(Body, ABC):
         self.collidables = self._sprite_groups['obstacles']
         self.look_vec = pg.Vector2()
 
+        shadow_stats = self._get_shadow_stats(generate_entity_shadow)
+        self.shadow = DynamicShadow(
+            sprite_groups, assets, shadow_stats, owner=self
+            )
+
         self.weapons = []
 
     def take_damage(self, amount):
@@ -40,11 +47,12 @@ class Entity(Body, ABC):
     def kill(self):
         for weapon in self.weapons:
             weapon.kill()
+        self.shadow.kill()
         super().kill()
 
     def _handle_collision(self, _):
         return 'STOP'
-
+        
     def _flip_image(self):
         should_flip = self.look_vec.x < 0
         if should_flip != self.image_flipped:
@@ -64,3 +72,22 @@ class Entity(Body, ABC):
             else:
                 weapon.unequip()
             self.weapons.append(weapon)
+
+
+class DynamicShadow(BaseSprite):
+    _layer = cfg.LAYERS['shadow']
+
+    def __init__(self, sprite_groups, assets, stats, owner: Entity):
+        super().__init__(sprite_groups, assets, owner.rect.center, stats)
+
+        self._add_to_groups('rendering')
+
+        self.owner = owner
+
+        self.offset = self.rect.height * 2.5
+
+    def update(self):
+        self.rect.center = (
+            self.owner.rect.centerx,
+            self.owner.rect.centery + self.offset
+        )

@@ -1,7 +1,8 @@
 from .base import BaseSprite, HitboxSprite, Body, Entity
 
-from .camera import Camera
 from .timer import Timer
+from .camera import Camera
+from .shadow import Shadow
 from .weapon import Weapon
 from .wall import Wall
 from .projectile import Projectile

@@ -2,8 +2,8 @@ from math import copysign
 import pygame as pg
 
 from . import Entity
-from .timer import Timer
 from .weapon import Weapon
+from .timer import Timer
 from .. import config as cfg
 
 
@@ -23,13 +23,17 @@ class Player(Entity):
         
         self._add_weapons(Weapon, stats['components']['start_weapon_keys'])
 
-        self.timers = {'dash': Timer(
-            duration=150, end_func=self._stop_dash, cooldown=500
-            )}
+        self.timers = {
+            'dash': Timer(
+                **stats['components']['timers']['dash'],
+                end_func=self._stop_dash
+                )
+        }
 
     def update_movement(self, dt):
         self._get_movement_input()
         self._move(dt)
+        self.shadow.update()
         self.timers['dash'].update()
     
     def update_actions(self, self_to_mouse_vec: pg.Vector2):

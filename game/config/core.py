@@ -23,9 +23,10 @@ FPS = 60
 
 # ПАРАМЕТРЫ ОТРИСОВКИ
 LAYERS: Layers = {
-    'wall_face': 0,
-    'enemy': 2,
-    'player': 6,
-    'projectile': 8,
-    'wall_top': 9
+    'shadow': 0,
+    'wall_face': 1,
+    'enemy': 3,
+    'player': 7,
+    'projectile': 9,
+    'wall_top': 10
 }

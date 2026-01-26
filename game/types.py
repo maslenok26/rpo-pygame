@@ -16,23 +16,25 @@ class SpriteGroups(TypedDict):
     player_projectiles: pg.sprite.Group[Projectile]
     enemy_projectiles: pg.sprite.Group[Projectile]
 
-
+    
 class WallAssets(TypedDict):
-    tops: list[pg.Surface]
-    face: list[pg.Surface]
+    tops: tuple[pg.Surface]
+    face: tuple[pg.Surface]
 
 class Assets(TypedDict):
-    floor: list[pg.Surface]
+    shadows: dict[str, tuple[pg.Surface]]
+    floor: tuple[pg.Surface]
     walls: WallAssets
-    player: list[pg.Surface]
-    enemy: list[pg.Surface]
-    pistol: list[pg.Surface]
-    shotgun: list[pg.Surface]
-    projectile: list[pg.Surface]
+    player: tuple[pg.Surface]
+    enemy: tuple[pg.Surface]
+    pistol: tuple[pg.Surface]
+    shotgun: tuple[pg.Surface]
+    projectile: tuple[pg.Surface]
 
 
 # ТИПЫ ДЛЯ CONFIG/
 class Layers(TypedDict):
+    shadow: int
     wall_face: int
     enemy: int
     player: int
@@ -67,6 +69,8 @@ class PhysicsStats(TypedDict):
 
 class RenderStats(TypedDict):
     asset_path: NotRequired[str]
+    # wall
+    y_offset: NotRequired[int]
 
 class ComponentsStats(TypedDict):
     timers: NotRequired[dict[str, dict[str, int]]]

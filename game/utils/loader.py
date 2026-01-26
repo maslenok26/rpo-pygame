@@ -5,18 +5,18 @@ import pygame as pg
 
 def load_folder(path):
     folder = tuple(
-        _load_surface(file)
+        _load_image(file)
         for file in sorted(Path(path).glob('*.png'))
     )
     return folder
 
-def load_image(file):
-    return (_load_surface(file),)
+def load_asset(file):
+    return (_load_image(file),)
 
-def _load_surface(file):
-    surf = pg.image.load(file)
-    if surf.get_alpha() is not None:
-        surf = surf.convert_alpha()
+def _load_image(file):
+    image = pg.image.load(file)
+    if image.get_alpha() is not None:
+        image = image.convert_alpha()
     else:
-        surf = surf.convert()
-    return surf
+        image = image.convert()
+    return image

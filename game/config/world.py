@@ -11,7 +11,8 @@ WALL: Stats = {
         'hitbox_size': (TILE_SIZE, TILE_SIZE)
     },
     'render': {
-        'asset_path': 'walls.tops'
+        'asset_path': 'walls.tops',
+        'y_offset': 4
     }
 }
 

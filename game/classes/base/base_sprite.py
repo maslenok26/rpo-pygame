@@ -1,5 +1,6 @@
 from __future__ import annotations
 from abc import ABC
+from typing import Callable
 
 import pygame as pg
 
@@ -21,9 +22,8 @@ class BaseSprite(pg.sprite.Sprite, ABC):
         self._assets = assets
 
         self.rect = pg.Rect(*pos, 0, 0)
-        self.orig_image = self._get_asset(
-            stats['render']['asset_path']
-            )[self.image_idx]
+        self.asset_path = stats['render']['asset_path']
+        self.orig_image = self._get_asset(self.asset_path)[self.image_idx]
         self._set_image(self.orig_image)
 
     def _get_asset(self, path: str):
@@ -40,3 +40,17 @@ class BaseSprite(pg.sprite.Sprite, ABC):
         for key in keys:
             sprite_group: pg.sprite.AbstractGroup = self._sprite_groups[key]
             sprite_group.add(self)
+
+    def _get_shadow_stats(
+            self, gen_func: Callable[[pg.Surface], pg.Surface]
+            ):
+        shadow_assets = self._assets['shadows']
+        shadow_key = self.asset_path.replace('.', '-')
+        if shadow_key not in shadow_assets:
+            shadow_assets[shadow_key] = gen_func(self.image)
+        shadow_stats: Stats = {
+            'render': {
+                'asset_path': f'shadows.{shadow_key}'
+            }
+        }
+        return shadow_stats

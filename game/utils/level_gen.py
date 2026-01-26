@@ -95,7 +95,8 @@ class LevelGenerator:
                 self._carve_floor(x, y)
         self._map_data[player_pos[1]][player_pos[0]] = 'P'
         SAFE_RADIUS_TILES = (
-            cfg.ENEMIES['enemy']['general']['detection_radius'] / cfg.TILE_SIZE) + 2
+            cfg.ENEMIES['enemy']['general']['detection_radius'] / cfg.TILE_SIZE
+            ) + 2
         enemy_pos_candidates = [
             tile_pos for tile_pos in self._floor_tiles
             if dist(tile_pos, player_pos) > SAFE_RADIUS_TILES

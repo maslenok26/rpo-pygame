@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 PLAYER: Stats = {
     'general': {
         'faction': 'player',
-        'hp': float('inf')
+        'hp': 100
         },
     'physics': {
         'hitbox_size': (10, 14),

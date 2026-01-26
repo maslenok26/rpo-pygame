@@ -23,6 +23,7 @@ class Weapon(BaseSprite):
 
         self.owner = owner
         self.faction_rule = cfg.FACTION_RULES[owner.faction]
+        
         general = stats['general']
         self.proj_stats = general['proj_stats']
         self.orbit_offset = pg.Vector2(general['orbit_offset'])
@@ -38,7 +39,7 @@ class Weapon(BaseSprite):
         self.vector = owner.look_vec
         
         self.holstered_image = pg.transform.rotate(
-            self.orig_image, -self.holstered_angle
+            self.image, -self.holstered_angle
             )
 
         self.timers = {
@@ -47,9 +48,9 @@ class Weapon(BaseSprite):
 
     def update(self):
         self._sync_with_owner()
+        self.timers['shoot'].update()
         if self.is_active:
             self._rotate()
-        self.timers['shoot'].update()
 
     def animate(self):
         if self.is_active:
@@ -78,20 +79,20 @@ class Weapon(BaseSprite):
             self.faction_rule
         )
 
-    def _sync_with_owner(self):
-        self.rect.center = self.owner.rect.center
-
     def _rotate(self):
-        cur_angle = self.vector.angle
+        angle = self.vector.angle
         self._cur_orbit_offset = self.orbit_offset.copy()
         self._cur_muzzle_offset = self.muzzle_offset.copy()
-        should_flip = abs(cur_angle) > 90
+        should_flip = abs(angle) > 90
         if should_flip:
             self._cur_orbit_offset.y *= -1
             self._cur_muzzle_offset.y *= -1
-        self._cur_orbit_offset.rotate_ip(cur_angle)
-        self._cur_muzzle_offset.rotate_ip(cur_angle)
+        self._cur_orbit_offset.rotate_ip(angle)
+        self._cur_muzzle_offset.rotate_ip(angle)
         self.rect.center += self._cur_orbit_offset
+
+    def _sync_with_owner(self):
+        self.rect.center = self.owner.rect.center
 
     def _rotate_image_active(self):
         angle = self.vector.angle
