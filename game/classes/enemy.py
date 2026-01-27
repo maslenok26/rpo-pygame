@@ -1,9 +1,8 @@
 from __future__ import annotations
 from math import copysign
 
-from . import Entity
+from . import Entity, Timer
 from .weapon import Weapon
-from .timer import Timer
 from .. import config as cfg
 
 from typing import TYPE_CHECKING
@@ -16,9 +15,9 @@ class Enemy(Entity):
     target: Player | None
 
     def __init__(self, sprite_groups, assets, pos):
-        stats = cfg.ENEMIES['enemy']
+        stats = cfg.ENEMIES['skeleton']
 
-        super().__init__(sprite_groups, assets, pos, stats)
+        super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
         self._add_to_groups('rendering', 'enemies')
 
@@ -27,29 +26,23 @@ class Enemy(Entity):
         self.shoot_radius = general['shoot_radius']
         self.stop_radius = general['stop_radius']
 
-        self._add_weapons(Weapon, stats['components']['start_weapon_keys'])
-
-        self.timers = {
-            'shoot': Timer(**stats['components']['timers']['shoot'])
-        }
+        self._init_timers(stats, shoot=None)
 
         self.target = None
         self.target_dist = 0
 
     def update(self, dt):
-        self.timers['shoot'].update()
         if self.target:
             self._follow_target()
         self._move(dt)
-        self.shadow.update()
-        self.weapon.update()
         if self.target:
+            self.weapon.aim()
             self._attack_target()
-        self.animate()
+        self._update_timers()
+        self._animate()
 
-    def animate(self):
+    def _animate(self):
         self._flip_image()
-        self.weapon.animate()
 
     def _follow_target(self):
         self_to_target_vec = self.target.pos - self.pos

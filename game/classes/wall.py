@@ -1,5 +1,4 @@
 from . import BaseSprite, HitboxSprite
-from .shadow import Shadow
 from ..utils import generate_obstacle_shadow
 from .. import config as cfg
 
@@ -21,7 +20,7 @@ class Wall(HitboxSprite):
                 sprite_groups, assets, self.rect.midbottom
             )
             shadow_stats = self._get_shadow_stats(generate_obstacle_shadow)
-            self.shadow = Shadow(
+            self.shadow = StaticShadow(
                 sprite_groups, assets, self.face.rect.midbottom, shadow_stats
             )
             self.kill = self._kill_with_components
@@ -39,6 +38,15 @@ class WallFace(BaseSprite):
     def __init__(self, sprite_groups, assets, pos):
         stats = cfg.WALL_FACE
 
+        super().__init__(sprite_groups, assets, pos, stats)
+
+        self._add_to_groups('rendering')
+
+
+class StaticShadow(BaseSprite):
+    _layer = cfg.LAYERS['shadow']
+
+    def __init__(self, sprite_groups, assets, pos, stats):
         super().__init__(sprite_groups, assets, pos, stats)
 
         self._add_to_groups('rendering')

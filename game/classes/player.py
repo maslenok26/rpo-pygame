@@ -3,7 +3,6 @@ import pygame as pg
 
 from . import Entity
 from .weapon import Weapon
-from .timer import Timer
 from .. import config as cfg
 
 
@@ -13,28 +12,20 @@ class Player(Entity):
     def __init__(self, sprite_groups, assets, pos):
         stats = cfg.PLAYER
 
-        super().__init__(sprite_groups, assets, pos, stats)
+        super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
         self._add_to_groups('rendering', 'player')
 
         physics = stats['physics']
         self.base_speed = physics['speed']
         self.dash_speed = physics['dash_speed']
-        
-        self._add_weapons(Weapon, stats['components']['start_weapon_keys'])
 
-        self.timers = {
-            'dash': Timer(
-                **stats['components']['timers']['dash'],
-                end_func=self._stop_dash
-                )
-        }
+        self._init_timers(stats, dash=self._stop_dash)
 
     def update_movement(self, dt):
         self._get_movement_input()
         self._move(dt)
-        self.shadow.update()
-        self.timers['dash'].update()
+        self._update_timers()
     
     def update_actions(self, self_to_mouse_vec: pg.Vector2):
         if self_to_mouse_vec:
@@ -42,14 +33,11 @@ class Player(Entity):
             if new_look_vec.x == 0:
                 new_look_vec.x = copysign(cfg.EPSILON, self.look_vec.x)
             self.look_vec.update(new_look_vec)
-        for weapon in self.weapons:
-            weapon.update()
+        self.weapon.aim()
         self._get_actions_input()
 
     def animate(self):
         self._flip_image()
-        for weapon in self.weapons:
-            weapon.animate()
 
     def _get_movement_input(self):
         if self.timers['dash'].active: return

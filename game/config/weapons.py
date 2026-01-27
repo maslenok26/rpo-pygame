@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import FactionRule, StatsDict
+    from ..types import FactionRule, Stats
 
 FACTION_RULES: dict[str, FactionRule] = {
     'player': {
@@ -15,19 +15,23 @@ FACTION_RULES: dict[str, FactionRule] = {
     }
 }
 
-WEAPONS: StatsDict = {
-    'pistol': {
+WEAPONS: dict[str, Stats] = {
+    'revolver': {
         'general': {
             'orbit_offset': (8, 3),
             'muzzle_offset': (9, -2),
             'holstered_offset': (-5, -8),
+            'proj_amount': 1,
+            'spread_angle': 15,
             'proj_stats': {
                 'general': {
-                    'damage': 10
+                    'damage': 10,
+                    'bounces_left': 0
                 },
                 'physics': {
                     'hitbox_size': (4, 4),
-                    'speed': 150
+                    'speed': 200,
+                    'drag': 0.15
                 },
                 'render': {
                     'asset_path': 'projectile'
@@ -40,7 +44,7 @@ WEAPONS: StatsDict = {
             }
         },
         'render': {
-            'asset_path': 'pistol'
+            'asset_path': 'weapons.revolver'
         },
         'components': {
             'timers': {
@@ -53,13 +57,17 @@ WEAPONS: StatsDict = {
             'orbit_offset': (3, 4),
             'muzzle_offset': (19, -2),
             'holstered_offset': (-3, -4),
+            'proj_amount': 5,
+            'spread_angle': 40,
             'proj_stats': {
                 'general': {
-                    'damage': 40
+                    'damage': 8,
+                    'bounces_left': 2
                 },
                 'physics': {
                     'hitbox_size': (4, 4),
-                    'speed': 150
+                    'speed': 150,
+                    'drag': 0.3
                 },
                 'render': {
                     'asset_path': 'projectile'
@@ -72,11 +80,11 @@ WEAPONS: StatsDict = {
             }
         },
         'render': {
-            'asset_path': 'shotgun'
+            'asset_path': 'weapons.shotgun'
         },
         'components': {
             'timers': {
-                'shoot': {'cooldown': 300}
+                'shoot': {'cooldown': 750}
             }
         }
     }

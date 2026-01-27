@@ -1,6 +1,5 @@
 from collections import deque
 from random import choice
-
 import pygame as pg
 
 from ..classes import Camera, Wall, Enemy, Player
@@ -14,11 +13,11 @@ if TYPE_CHECKING:
 
 class GameManager:
     def __init__(self):
+        self.clock = pg.time.Clock()
+        self.camera = Camera()
         self._init_display()
         self._init_assets()
-        self._init_clock()
         self._init_sprite_groups()
-        self._init_camera()
 
     def get_fps(self):
         return cfg.FPS if cfg.FPS_LOCK else 0
@@ -40,15 +39,15 @@ class GameManager:
         self._sprite_groups['enemies'].update(dt)
         self._sprite_groups['player_projectiles'].update(dt)
         self._sprite_groups['enemy_projectiles'].update(dt)
-        if not self.player.alive(): return
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
         self.player.update_actions(player_to_mouse_vec)
         self.player.animate()
+        self._sprite_groups['entity_components'].update()
 
     def draw(self):
-        self.game_surf.fill((58, 68, 102))
+        self.game_surf.fill(cfg.BG_WALL_COLOR)
         self.screen.fill((0, 0, 0))
         camera_offset = self.camera.get_offset()
         self.game_surf.blit(self.static_surf, camera_offset)
@@ -69,7 +68,7 @@ class GameManager:
                 ).get_level()
         width = len(level_map[0])
         height = len(level_map)
-        depths = self._get_wall_depths(level_map, (width, height))
+        wall_depths = self._get_wall_depths(level_map, (width, height))
         self.static_surf = pg.Surface(
             ((width-1)*cfg.TILE_SIZE, (height-1)*cfg.TILE_SIZE)
             )
@@ -83,14 +82,15 @@ class GameManager:
                 self.static_surf.blit(choice(self._assets['floor']), (x, y))
                 spawn_pos = (x + (cfg.TILE_SIZE // 2), y + (cfg.TILE_SIZE // 2))
                 context = (self._sprite_groups, self._assets, spawn_pos)
-                if tile == 'P':
-                    player = Player(*context)
-                elif tile == 'W':
-                    needs_face = not (row_idx + 1 >= len(level_map))
-                    depth = min(depths[(tile_idx, row_idx)], 2)
-                    Wall(*context, depth, needs_face)
-                elif tile == 'E':
-                    Enemy(*context)
+                match tile:
+                    case 'W':
+                        needs_face = not (row_idx + 1 >= len(level_map))
+                        depth = min(wall_depths[(tile_idx, row_idx)], 2)
+                        Wall(*context, depth, needs_face)
+                    case 'P':
+                        player = Player(*context)
+                    case 'E':
+                        Enemy(*context)
         self._init_player(player)
 
     def resize(self):
@@ -102,7 +102,7 @@ class GameManager:
             cfg.START_SCREEN_SIZE, flags=display_flags, vsync=1
             )
         self.game_surf = pg.Surface((cfg.GAME_WIDTH, cfg.GAME_HEIGHT))
-        self.layout = Layout(self.screen.size)
+        self.layout = self._Layout(self.screen.size)
     
     def _init_assets(self):
         self._assets: Assets = {
@@ -112,19 +112,11 @@ class GameManager:
                 'tops': loader.load_folder('assets/walls/tops'),
                 'face': loader.load_asset('assets/walls/wall_face.png')
             },
+            'weapons': loader.load_collection('assets/weapons'),
             'player': loader.load_asset('assets/player.png'),
-            'enemy': [pg.transform.scale(
-                loader.load_asset('assets/enemy.png')[0], (14, 14)
-                )],
-            'pistol': loader.load_asset('assets/pistol.png'),
-            'shotgun': loader.load_asset('assets/shotgun.png'),
-            'projectile': loader.load_asset(
-                'assets/projectile.png'
-                )
+            'skeleton': loader.load_asset('assets/skeleton.png'),
+            'projectile': loader.load_asset('assets/projectile.png')
         }
-
-    def _init_clock(self):
-        self.clock = pg.time.Clock()
     
     def _init_sprite_groups(self):
         self._sprite_groups: SpriteGroups = {
@@ -133,11 +125,9 @@ class GameManager:
             'player': pg.sprite.GroupSingle(),
             'enemies': pg.sprite.Group(),
             'player_projectiles': pg.sprite.Group(),
-            'enemy_projectiles': pg.sprite.Group()
+            'enemy_projectiles': pg.sprite.Group(),
+            'entity_components': pg.sprite.Group()
         }
-
-    def _init_camera(self):
-        self.camera = Camera()
 
     def _get_wall_depths(self, level_map, level_size):
         width, height = level_size
@@ -168,21 +158,21 @@ class GameManager:
             enemy.target = player
 
 
-class Layout:
-    def __init__(self, screen_size):
-        self.offset = pg.Vector2()
-        self.update(screen_size)
-    
-    def update(self, screen_size):
-        screen_width, screen_height = screen_size
-        scales = (
-            screen_width / cfg.GAME_WIDTH, screen_height / cfg.GAME_HEIGHT
-            )
-        scale = min(scales) if cfg.LETTERBOXING else max(scales)
-        scaled_width = cfg.GAME_WIDTH * scale
-        scaled_height = cfg.GAME_HEIGHT * scale
-        offset_x = (screen_width - scaled_width) // 2
-        offset_y = (screen_height - scaled_height) // 2
-        self.scale = scale
-        self.offset.update(offset_x, offset_y)
-        self.size = (int(scaled_width), int(scaled_height))
+    class _Layout:
+        def __init__(self, screen_size):
+            self.offset = pg.Vector2()
+            self.update(screen_size)
+        
+        def update(self, screen_size):
+            screen_width, screen_height = screen_size
+            scales = (
+                screen_width / cfg.GAME_WIDTH, screen_height / cfg.GAME_HEIGHT
+                )
+            scale = min(scales) if cfg.LETTERBOXING else max(scales)
+            scaled_width = cfg.GAME_WIDTH * scale
+            scaled_height = cfg.GAME_HEIGHT * scale
+            offset_x = (screen_width - scaled_width) // 2
+            offset_y = (screen_height - scaled_height) // 2
+            self.scale = scale
+            self.offset.update(offset_x, offset_y)
+            self.size = (int(scaled_width), int(scaled_height))

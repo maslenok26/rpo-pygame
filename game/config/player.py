@@ -11,7 +11,7 @@ PLAYER: Stats = {
         },
     'physics': {
         'hitbox_size': (10, 14),
-        'speed': 135,
+        'speed': 120,
         'dash_speed': 300
         },
     'render':{
@@ -21,6 +21,6 @@ PLAYER: Stats = {
         'timers': {
             'dash': {'duration': 150, 'cooldown': 500}
         },
-        'start_weapon_keys': ('pistol', 'shotgun')
+        'start_weapon_keys': ('revolver', 'shotgun')
     }
 }

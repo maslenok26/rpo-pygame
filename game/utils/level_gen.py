@@ -77,13 +77,15 @@ class LevelGenerator:
         self._floor_tiles.add((x, y))
 
     def _spawn_objects(self):
-        _floor_tiles_amount = len(self._floor_tiles)
+        floor_tiles_amount = len(self._floor_tiles)
         positions_x, positions_y = zip(*self._floor_tiles)
         center = (
-            sum(positions_x) / _floor_tiles_amount,
-            sum(positions_y) / _floor_tiles_amount
+            sum(positions_x) / floor_tiles_amount,
+            sum(positions_y) / floor_tiles_amount
         )
-        most_distant = max(self._floor_tiles, key=lambda pos: dist(pos, center))
+        most_distant = max(
+            self._floor_tiles, key=lambda pos: dist(pos, center)
+            )
         x, y = most_distant
         OFFSET = 2
         if abs(x - center[0]) > abs(y - center[1]):
@@ -95,7 +97,8 @@ class LevelGenerator:
                 self._carve_floor(x, y)
         self._map_data[player_pos[1]][player_pos[0]] = 'P'
         SAFE_RADIUS_TILES = (
-            cfg.ENEMIES['enemy']['general']['detection_radius'] / cfg.TILE_SIZE
+            cfg.ENEMIES['skeleton']['general']['detection_radius']
+            / cfg.TILE_SIZE
             ) + 2
         enemy_pos_candidates = [
             tile_pos for tile_pos in self._floor_tiles

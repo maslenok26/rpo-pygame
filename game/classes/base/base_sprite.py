@@ -4,6 +4,8 @@ from typing import Callable
 
 import pygame as pg
 
+from .. import Timer
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ...types import SpriteGroups, Assets, Stats
@@ -35,6 +37,16 @@ class BaseSprite(pg.sprite.Sprite, ABC):
     def _set_image(self, image: pg.Surface):
         self.image = image
         self.rect.size, self.rect.center = image.size, self.rect.center
+
+    def _init_timers(self, stats: Stats, **end_funcs):
+        self.timers = {
+            key: Timer(**stats['components']['timers'][key], end_func=end_func)
+            for key, end_func in end_funcs.items()
+        }
+
+    def _update_timers(self):
+        for timer in self.timers.values():
+            timer.update()
 
     def _add_to_groups(self, *keys):
         for key in keys:

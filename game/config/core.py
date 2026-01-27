@@ -30,3 +30,4 @@ LAYERS: Layers = {
     'projectile': 9,
     'wall_top': 10
 }
+BG_WALL_COLOR = (58, 68, 102)

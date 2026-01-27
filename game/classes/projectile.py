@@ -4,7 +4,6 @@ from itertools import chain
 import pygame as pg
 
 from . import Body
-from .timer import Timer
 from .. import config as cfg
 
 from typing import TYPE_CHECKING
@@ -28,7 +27,10 @@ class Projectile(Body):
         self._add_to_groups('rendering', faction_rule['proj_self_group_key'])
 
         general = stats['general']
+        physics = stats['physics']
         self.damage = general['damage']
+        self.bounces_left = general['bounces_left']
+        self.drag = physics['drag']
         
         is_inside_obstacle = pg.sprite.spritecollideany(
             self,
@@ -47,17 +49,14 @@ class Projectile(Body):
 
         self._set_image(pg.transform.rotate(self.image, -vector.angle))
         
-        self.timers = {
-            'lifetime': Timer(
-                **stats['components']['timers']['lifetime'], end_func=self.kill
-                )
-        }
+        self._init_timers(stats, lifetime=self.kill)
         self.timers['lifetime'].start()
     
     def update(self, dt):
         self._update_collidables()
         self._move(dt)
-        self.timers['lifetime'].update()
+        self.speed *= 1 - (self.drag * dt)
+        self._update_timers()
     
     def _update_collidables(self):
         self.collidables = tuple(
@@ -70,5 +69,8 @@ class Projectile(Body):
                 sprite: Entity
                 sprite.take_damage(self.damage)
                 return 'DESTROY'
+        if not self.bounces_left:
+            return 'DESTROY'
+        self.bounces_left -= 1
         self.image = pg.transform.rotate(self.orig_image, self.move_vec.angle)
         return 'BOUNCE'
