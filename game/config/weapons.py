@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from .core import LAYERS
+from ..utils import config
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import FactionRule, Stats
+    from ..types import FactionRule, StatsLeaf
 
 FACTION_RULES: dict[str, FactionRule] = {
     'player': {
@@ -15,7 +18,17 @@ FACTION_RULES: dict[str, FactionRule] = {
     }
 }
 
-WEAPONS: dict[str, Stats] = {
+WEAPONS: dict[str, StatsLeaf] = config({
+    'default': {
+        'general': {
+            'proj_stats': {
+                'render': {
+                    'layer': LAYERS['projectile'],
+                    'asset_path': 'projectile'
+                    }
+                }
+            }
+        },
     'revolver': {
         'general': {
             'orbit_offset': (8, 3),
@@ -30,11 +43,8 @@ WEAPONS: dict[str, Stats] = {
                 },
                 'physics': {
                     'hitbox_size': (4, 4),
-                    'speed': 200,
+                    'speed': 230,
                     'drag': 0.15
-                },
-                'render': {
-                    'asset_path': 'projectile'
                 },
                 'components': {
                     'timers': {
@@ -66,11 +76,8 @@ WEAPONS: dict[str, Stats] = {
                 },
                 'physics': {
                     'hitbox_size': (4, 4),
-                    'speed': 150,
+                    'speed': 160,
                     'drag': 0.3
-                },
-                'render': {
-                    'asset_path': 'projectile'
                 },
                 'components': {
                     'timers': {
@@ -88,4 +95,4 @@ WEAPONS: dict[str, Stats] = {
             }
         }
     }
-}
+})

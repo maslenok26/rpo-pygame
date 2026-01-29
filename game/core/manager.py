@@ -2,7 +2,7 @@ from collections import deque
 from random import choice
 import pygame as pg
 
-from ..classes import Camera, Wall, Enemy, Player
+from ..classes import Camera, Wall, Enemy, Player, ComponentGroup
 from ..utils import LevelGenerator, loader
 from .. import config as cfg
 
@@ -126,7 +126,7 @@ class GameManager:
             'enemies': pg.sprite.Group(),
             'player_projectiles': pg.sprite.Group(),
             'enemy_projectiles': pg.sprite.Group(),
-            'entity_components': pg.sprite.Group()
+            'entity_components': ComponentGroup()
         }
 
     def _get_wall_depths(self, level_map, level_size):

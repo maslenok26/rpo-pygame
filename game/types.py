@@ -64,7 +64,7 @@ class GeneralStats(TypedDict):
     cooldown: NotRequired[int]
     proj_amount: NotRequired[int]
     spread_angle: NotRequired[int]
-    proj_stats: NotRequired[Stats]
+    proj_stats: NotRequired[StatsLeaf]
     
 class PhysicsStats(TypedDict):
     hitbox_size: NotRequired[tuple[int, int]]
@@ -76,6 +76,7 @@ class PhysicsStats(TypedDict):
     drag: NotRequired[float]
 
 class RenderStats(TypedDict):
+    layer: NotRequired[int]
     asset_path: NotRequired[str]
     # wall
     y_offset: NotRequired[int]
@@ -85,8 +86,11 @@ class ComponentsStats(TypedDict):
     # entity
     start_weapon_keys: NotRequired[tuple[str]]
 
-class Stats(TypedDict):
+class StatsLeafBase(TypedDict):
     general: NotRequired[GeneralStats]
     physics: NotRequired[PhysicsStats]
     render: NotRequired[RenderStats]
     components: NotRequired[ComponentsStats]
+
+class StatsLeaf(StatsLeafBase):
+    default: StatsLeafBase

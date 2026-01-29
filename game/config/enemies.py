@@ -1,13 +1,23 @@
 from __future__ import annotations
 
+from .core import LAYERS
+from ..utils import config
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import Stats
+    from ..types import StatsLeaf
 
-ENEMIES: dict[str, Stats] = {
+ENEMIES: dict[str, StatsLeaf] = config({
+    'default': {
+        'general': {
+            'faction': 'enemy'
+        },
+        'render': {
+            'layer': LAYERS['enemy']
+        }
+        },
     'skeleton': {
         'general': {
-            'faction': 'enemy',
             'hp': 30,
             'detection_radius': 120,
             'shoot_radius': 100,
@@ -27,4 +37,4 @@ ENEMIES: dict[str, Stats] = {
             'start_weapon_keys': ('revolver',)
         }
     }
-}
+})

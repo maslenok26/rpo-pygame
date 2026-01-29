@@ -24,6 +24,7 @@ class Weapon(Component):
         self.faction_rule = cfg.FACTION_RULES[owner.faction]
         
         general = stats['general']
+        
         self.orbit_offset = pg.Vector2(general['orbit_offset'])
         self.muzzle_offset = pg.Vector2(general['muzzle_offset'])
         self.holstered_offset = pg.Vector2(general['holstered_offset'])
@@ -32,8 +33,6 @@ class Weapon(Component):
         self.proj_stats = general['proj_stats']
         self.proj_amount = general['proj_amount']
         self.spread_angle = general['spread_angle']
-
-        self._cur_orbit_offset = 0
 
         self._orig_layer = owner._layer
         self._layer = self._orig_layer
@@ -84,7 +83,7 @@ class Weapon(Component):
         self._sync_with_owner()
         self.rect.center += self._cur_orbit_offset
 
-    def _update_logic(self):
+    def update(self):
         self._update_timers()
         self._animate()
 

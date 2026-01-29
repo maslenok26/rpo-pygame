@@ -9,18 +9,16 @@ from ... import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ...types import Stats
+    from ...types import StatsLeaf
 
 
 class Body(HitboxSprite, ABC):
     collidables: pg.sprite.Group[HitboxSprite] | tuple[HitboxSprite]
     
-    def __init__(self, sprite_groups, assets, pos, stats: Stats):
+    def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
         super().__init__(sprite_groups, assets, pos, stats)
 
         self.speed = stats['physics']['speed']
-
-        self.collidables = None
         
         self.pos = pg.Vector2(*pos)
         self.move_vec = pg.Vector2()

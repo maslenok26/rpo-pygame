@@ -4,8 +4,6 @@ from .. import config as cfg
 
 
 class Wall(HitboxSprite):
-    _layer = cfg.LAYERS['wall_top']
-
     def __init__(self, sprite_groups, assets, pos, depth, needs_face):
         stats = cfg.WALL
         Y_OFFSET = stats['render']['y_offset']
@@ -13,14 +11,14 @@ class Wall(HitboxSprite):
 
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._add_to_groups('rendering', 'obstacles')
+        self._add_to_groups('obstacles')
 
         if needs_face:
-            self.face = WallFace(
-                sprite_groups, assets, self.rect.midbottom
+            self.face = BaseSprite(
+                sprite_groups, assets, self.rect.midbottom, cfg.WALL_FACE
             )
             shadow_stats = self._get_shadow_stats(generate_obstacle_shadow)
-            self.shadow = StaticShadow(
+            self.shadow = BaseSprite(
                 sprite_groups, assets, self.face.rect.midbottom, shadow_stats
             )
             self.kill = self._kill_with_components
@@ -30,23 +28,3 @@ class Wall(HitboxSprite):
         self.face.kill()
         self.shadow.kill()
         super().kill()
-
-
-class WallFace(BaseSprite):
-    _layer = cfg.LAYERS['wall_face']
-
-    def __init__(self, sprite_groups, assets, pos):
-        stats = cfg.WALL_FACE
-
-        super().__init__(sprite_groups, assets, pos, stats)
-
-        self._add_to_groups('rendering')
-
-
-class StaticShadow(BaseSprite):
-    _layer = cfg.LAYERS['shadow']
-
-    def __init__(self, sprite_groups, assets, pos, stats):
-        super().__init__(sprite_groups, assets, pos, stats)
-
-        self._add_to_groups('rendering')

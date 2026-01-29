@@ -2,6 +2,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import final, TYPE_CHECKING
 
+import pygame as pg
+
 from .base_sprite import BaseSprite
 
 from typing import TYPE_CHECKING
@@ -18,16 +20,14 @@ class Component(BaseSprite, ABC):
 
         self._add_to_groups('entity_components')
 
-    @final
-    def update(self):
-        if not self.owner.alive():
-            self.kill()
-            return
-        self._update_logic()
-
-    @abstractmethod
-    def _update_logic(self) -> None:
-        ...
-
     def _sync_with_owner(self):
         self.rect.center = self.owner.rect.center
+
+
+class ComponentGroup(pg.sprite.Group[Component]):
+    def update(self, *args, **kwargs):
+        for component in self.sprites():
+            if not component.owner.alive():
+                component.kill()
+            else:
+                component.update(*args, **kwargs)

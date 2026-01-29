@@ -7,16 +7,15 @@ from .. import config as cfg
 
 
 class Player(Entity):
-    _layer = cfg.LAYERS['player']
-
     def __init__(self, sprite_groups, assets, pos):
         stats = cfg.PLAYER
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._add_to_groups('rendering', 'player')
+        self._add_to_groups('player')
 
         physics = stats['physics']
+        
         self.base_speed = physics['speed']
         self.dash_speed = physics['dash_speed']
 

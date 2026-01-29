@@ -7,11 +7,11 @@ from .base_sprite import BaseSprite
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ...types import Stats
+    from ...types import StatsLeaf
 
 
 class HitboxSprite(BaseSprite, ABC):
-    def __init__(self, sprite_groups, assets, pos, stats: Stats):
+    def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
         super().__init__(sprite_groups, assets, pos, stats)
 
         self.hitbox = pg.Rect(0, 0, *stats['physics']['hitbox_size'])

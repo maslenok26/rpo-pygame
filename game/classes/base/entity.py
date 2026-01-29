@@ -7,21 +7,20 @@ import pygame as pg
 from .component import Component
 from .body import Body
 from ...utils import generate_entity_shadow
-from ... import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..weapon import Weapon
-    from ...types import Stats
+    from ...types import StatsLeaf
 
 
 class Entity(Body, ABC):
     image_flipped = False
     weapons: list[Weapon]
-    weapon: Weapon = None
+    weapon: Weapon
 
     def __init__(
-            self, sprite_groups, assets, pos, stats: Stats,
+            self, sprite_groups, assets, pos, stats: StatsLeaf,
             WeaponClass: type[Weapon]
             ):
         super().__init__(sprite_groups, assets, pos, stats)
@@ -76,15 +75,11 @@ class Entity(Body, ABC):
 
 
 class DynamicShadow(Component):
-    _layer = cfg.LAYERS['shadow']
-
     def __init__(self, sprite_groups, assets, stats, owner):
         super().__init__(sprite_groups, assets, stats, owner)
-        
-        self._add_to_groups('rendering')
 
         self.offset = self.rect.height * 2.5
 
-    def _update_logic(self):
+    def update(self):
         self._sync_with_owner()
         self.rect.centery += self.offset

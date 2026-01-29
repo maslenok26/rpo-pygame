@@ -1,7 +1,7 @@
 from __future__ import annotations
 from math import copysign
 
-from . import Entity, Timer
+from . import Entity
 from .weapon import Weapon
 from .. import config as cfg
 
@@ -11,7 +11,6 @@ if TYPE_CHECKING:
 
 
 class Enemy(Entity):
-    _layer = cfg.LAYERS['enemy']
     target: Player | None
 
     def __init__(self, sprite_groups, assets, pos):
@@ -19,9 +18,10 @@ class Enemy(Entity):
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._add_to_groups('rendering', 'enemies')
+        self._add_to_groups('enemies')
 
         general = stats['general']
+        
         self.detection_radius = general['detection_radius']
         self.shoot_radius = general['shoot_radius']
         self.stop_radius = general['stop_radius']

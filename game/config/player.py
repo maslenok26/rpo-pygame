@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from .core import LAYERS
+
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import Stats
+    from ..types import StatsLeaf
 
-PLAYER: Stats = {
+PLAYER: StatsLeaf = {
     'general': {
         'faction': 'player',
         'hp': 100
@@ -15,6 +17,7 @@ PLAYER: Stats = {
         'dash_speed': 300
         },
     'render':{
+        'layer': LAYERS['player'],
         'asset_path': 'player'
         },
     'components': {

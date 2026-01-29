@@ -1,6 +1,8 @@
 from .shared import Timer
 
-from .base import BaseSprite, HitboxSprite, Component, Body, Entity
+from .base import (
+    BaseSprite, HitboxSprite, Component, ComponentGroup, Body, Entity
+)
 
 from .camera import Camera
 from .weapon import Weapon

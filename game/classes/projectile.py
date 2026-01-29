@@ -4,30 +4,29 @@ from itertools import chain
 import pygame as pg
 
 from . import Body
-from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import HitboxSprite, Entity
-    from ..types import Stats, FactionRule
+    from ..types import StatsLeaf, FactionRule
 
 
 class Projectile(Body):
-    _layer = cfg.LAYERS['projectile']
     target_groups: tuple[pg.sprite.Group]
     collidables: tuple[HitboxSprite]
 
     def __init__(
-            self, sprite_groups, assets, pos, stats: Stats,
+            self, sprite_groups, assets, pos, stats: StatsLeaf,
             vector: pg.Vector2,
             faction_rule: FactionRule
             ):
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._add_to_groups('rendering', faction_rule['proj_self_group_key'])
+        self._add_to_groups(faction_rule['proj_self_group_key'])
 
         general = stats['general']
         physics = stats['physics']
+        
         self.damage = general['damage']
         self.bounces_left = general['bounces_left']
         self.drag = physics['drag']
