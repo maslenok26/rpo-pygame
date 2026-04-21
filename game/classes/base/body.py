@@ -69,6 +69,8 @@ class Body(HitboxSprite, ABC):
                 case cfg.CollisionAction.KILLSELF:
                     steps_to_do *= 0
                     self.kill()
+                case _:
+                    raise ValueError('Неизвестное действие при коллизии')
         self.rect.center = self.hitbox.center
 
     @abstractmethod

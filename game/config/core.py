@@ -35,8 +35,10 @@ LAYERS: Layers = {
 }
 BG_WALL_COLOR = (58, 68, 102)
 
-# СЛОЖНЫЕ КОНСТАНТЫ
+# ПРОЧИЕ КОНСТАНТЫ
 GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH / 2, GAME_HEIGHT / 2)
+ASSET_PATH_SEP = '.'
+ASSET_PATH_SEP_ALT = '/'
 
 # ENUM'Ы
 class CollisionAction(Enum):
@@ -44,3 +46,7 @@ class CollisionAction(Enum):
     PASS = auto()
     BOUNCE = auto()
     KILLSELF = auto()
+
+class AssetType(Enum):
+    SINGLE = auto()
+    TUPLE = auto()

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .core import TILE_SIZE, LAYERS
+from .core import TILE_SIZE, LAYERS, AssetType
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING: 
@@ -13,6 +13,7 @@ WALL: StatsLeaf = {
     'render': {
         'layer': LAYERS['wall_top'],
         'asset_path': 'walls.tops',
+        'asset_type': AssetType.TUPLE,
         'y_offset': 4
     }
 }
@@ -20,6 +21,7 @@ WALL: StatsLeaf = {
 WALL_FACE: StatsLeaf = {
     'render': {
         'layer': LAYERS['wall_face'],
-        'asset_path': 'walls.face'
+        'asset_path': 'walls.face',
+        'asset_type': AssetType.SINGLE
     }
 }

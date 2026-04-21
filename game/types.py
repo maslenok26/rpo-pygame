@@ -5,6 +5,7 @@ import pygame as pg
 
 if TYPE_CHECKING:
     from .classes import BaseSprite, HitboxSprite, Player, Enemy, Projectile
+    from . import config as cfg
 
 
 # ТИПЫ ДЛЯ MANAGER.PY
@@ -78,6 +79,7 @@ class PhysicsStats(TypedDict):
 class RenderStats(TypedDict):
     layer: NotRequired[int]
     asset_path: NotRequired[str]
+    asset_type: NotRequired[cfg.AssetType]
     # wall
     y_offset: NotRequired[int]
 
@@ -86,11 +88,8 @@ class ComponentsStats(TypedDict):
     # entity
     start_weapon_keys: NotRequired[tuple[str]]
 
-class StatsLeafBase(TypedDict):
+class StatsLeaf(TypedDict):
     general: NotRequired[GeneralStats]
     physics: NotRequired[PhysicsStats]
     render: NotRequired[RenderStats]
     components: NotRequired[ComponentsStats]
-
-class StatsLeaf(StatsLeafBase):
-    default: StatsLeafBase

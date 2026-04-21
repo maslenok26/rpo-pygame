@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from .core import LAYERS
-from ..utils import config
+from .core import LAYERS, AssetType
+from ..utils import merge_defaults
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -18,15 +18,19 @@ FACTION_RULES: dict[str, FactionRule] = {
     }
 }
 
-WEAPONS: dict[str, StatsLeaf] = config({
+WEAPONS: dict[str, StatsLeaf] = {
     'default': {
         'general': {
             'proj_stats': {
                 'render': {
                     'layer': LAYERS['projectile'],
-                    'asset_path': 'projectile'
+                    'asset_path': 'projectile',
+                    'asset_type': AssetType.SINGLE
                     }
                 }
+            },
+            'render': {
+                'asset_type': AssetType.SINGLE
             }
         },
     'revolver': {
@@ -95,4 +99,5 @@ WEAPONS: dict[str, StatsLeaf] = config({
             }
         }
     }
-})
+}
+merge_defaults(WEAPONS)

@@ -18,7 +18,7 @@ def load_arr(path):
     return assets
 
 def load_asset(file):
-    return (_load_image(file),)
+    return _load_image(file)
 
 def _get_files(path):
     return Path(path).glob('*.png')

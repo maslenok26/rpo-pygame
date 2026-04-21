@@ -47,9 +47,9 @@ class Player(Entity):
         if keys[pg.K_a]: self.move_vec.x -= 1
         if keys[pg.K_s]: self.move_vec.y += 1
         if keys[pg.K_d]: self.move_vec.x += 1
-        if self.move_vec:
-            self.move_vec.normalize_ip()
-            if keys_just_pressed[pg.K_SPACE]: self._start_dash()
+        if not self.move_vec: return
+        self.move_vec.normalize_ip()
+        if keys_just_pressed[pg.K_SPACE]: self._start_dash()
 
     def _get_actions_input(self):
         mouse = pg.mouse.get_just_pressed()

@@ -2,11 +2,10 @@ from copy import deepcopy
 
 LEAF_KEYS = {'general', 'physics', 'render', 'components'}
 
-def config(stats):
+def merge_defaults(stats):
     if _is_leaf(stats):
         raise ValueError('Конфиг не должен быть одиночным листом')
     _merge(stats)
-    return stats
 
 def _merge(stats: dict[str, dict], defaults: dict[str, dict]=None):
     cur_defaults = deepcopy(defaults) if defaults is not None else {}

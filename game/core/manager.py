@@ -81,6 +81,8 @@ class GameManager:
                 spawn_pos = (x + (cfg.TILE_SIZE // 2), y + (cfg.TILE_SIZE // 2))
                 context = (self._sprite_groups, self._assets, spawn_pos)
                 match tile:
+                    case '.':
+                        pass
                     case 'W':
                         needs_face = row_idx + 1 < len(level_map)
                         depth = min(wall_depths[(tile_idx, row_idx)], 2)
@@ -89,6 +91,10 @@ class GameManager:
                         player = Player(*context)
                     case 'E':
                         Enemy(*context)
+                    case _:
+                        raise ValueError(
+                            f'Неизвестное обозначение объекта на карте: {tile}'
+                            )
         self._init_player(player)
 
     def resize(self):

@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-from .core import LAYERS
-from ..utils import config
+from .core import LAYERS, AssetType
+from ..utils import merge_defaults
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..types import StatsLeaf
 
-ENEMIES: dict[str, StatsLeaf] = config({
+ENEMIES: dict[str, StatsLeaf] = {
     'default': {
         'general': {
             'faction': 'enemy'
         },
         'render': {
-            'layer': LAYERS['enemy']
+            'layer': LAYERS['enemy'],
+            'asset_type': AssetType.SINGLE
         }
         },
     'skeleton': {
@@ -25,7 +26,7 @@ ENEMIES: dict[str, StatsLeaf] = config({
         },
         'physics': {
             'hitbox_size': (10, 14),
-            'speed': 50,
+            'speed': 50
         },
         'render': {
             'asset_path': 'skeleton'
@@ -37,4 +38,5 @@ ENEMIES: dict[str, StatsLeaf] = config({
             'start_weapon_keys': ('revolver',)
         }
     }
-})
+}
+merge_defaults(ENEMIES)
