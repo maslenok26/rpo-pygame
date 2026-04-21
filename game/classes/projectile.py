@@ -4,6 +4,7 @@ from itertools import chain
 import pygame as pg
 
 from . import Body
+from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -67,9 +68,9 @@ class Projectile(Body):
             if any(sprite in group for group in self.target_groups):
                 sprite: Entity
                 sprite.take_damage(self.damage)
-                return 'DESTROY'
+                return cfg.CollisionAction.KILLSELF
         if not self.bounces_left:
-            return 'DESTROY'
+            return cfg.CollisionAction.KILLSELF
         self.bounces_left -= 1
         self.image = pg.transform.rotate(self.orig_image, self.move_vec.angle)
-        return 'BOUNCE'
+        return cfg.CollisionAction.BOUNCE

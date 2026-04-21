@@ -58,19 +58,19 @@ class Body(HitboxSprite, ABC):
             self.hitbox[axis_idx] -= overlap
             action = self._handle_collision(collisions)
             match action:
-                case 'STOP':
+                case cfg.CollisionAction.STOP:
                     steps_to_do[axis_idx] = 0
                     self._remainder[axis_idx] = 0
-                case 'BOUNCE':
+                case cfg.CollisionAction.BOUNCE:
                     self.move_vec[axis_idx] *= -1
                     steps_to_do[axis_idx] *= -1
                     self._remainder[axis_idx] *= -1
                     self.hitbox[axis_idx] -= overlap
-                case 'DESTROY':
+                case cfg.CollisionAction.KILLSELF:
                     steps_to_do *= 0
                     self.kill()
         self.rect.center = self.hitbox.center
 
     @abstractmethod
-    def _handle_collision(self, collisions) -> str:
+    def _handle_collision(self, collisions) -> cfg.CollisionAction:
         ...

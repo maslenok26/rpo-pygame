@@ -9,7 +9,7 @@ def config(stats):
     return stats
 
 def _merge(stats: dict[str, dict], defaults: dict[str, dict]=None):
-    cur_defaults = deepcopy(defaults) if defaults else {}
+    cur_defaults = deepcopy(defaults) if defaults is not None else {}
     _save_default(cur_defaults, stats)
     for key, child in stats.items():
         if _is_leaf(child):

@@ -1,4 +1,7 @@
 from __future__ import annotations
+from enum import Enum, auto
+
+import pygame as pg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -31,3 +34,13 @@ LAYERS: Layers = {
     'wall_top': 10
 }
 BG_WALL_COLOR = (58, 68, 102)
+
+# СЛОЖНЫЕ КОНСТАНТЫ
+GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH / 2, GAME_HEIGHT / 2)
+
+# ENUM'Ы
+class CollisionAction(Enum):
+    STOP = auto()
+    PASS = auto()
+    BOUNCE = auto()
+    KILLSELF = auto()

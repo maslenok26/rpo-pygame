@@ -20,7 +20,7 @@ class GameManager:
         self._init_sprite_groups()
 
     def get_fps(self):
-        return cfg.FPS if cfg.FPS_LOCK else 0
+        return cfg.FPS * cfg.FPS_LOCK
     
     def get_mouse_screen_pos(self):
         mouse_pos: pg.Vector2 = (
@@ -29,9 +29,7 @@ class GameManager:
         if cfg.LETTERBOXING:
             mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, cfg.GAME_WIDTH)
             mouse_pos.y = pg.math.clamp(mouse_pos.y, 0, cfg.GAME_HEIGHT)
-        game_surf_center = pg.Vector2(cfg.GAME_WIDTH/2, cfg.GAME_HEIGHT/2)
-        screen_pos = mouse_pos - game_surf_center
-        return screen_pos
+        return mouse_pos - cfg.GAME_SURF_CENTER
     
     def update(self, dt):
         if not self.player.alive(): return
@@ -59,7 +57,7 @@ class GameManager:
         self.screen.blit(scaled_game_surf, self.layout.offset)
 
     def init_level(self, level_map: list[str]=None):
-        if not level_map:
+        if level_map is None:
             level_map = LevelGenerator(
                 width=40, height=40, floor_percent=0.3,
                 walkers_amount=1, walkers_min=1, walkers_max=2,
@@ -84,7 +82,7 @@ class GameManager:
                 context = (self._sprite_groups, self._assets, spawn_pos)
                 match tile:
                     case 'W':
-                        needs_face = not (row_idx + 1 >= len(level_map))
+                        needs_face = row_idx + 1 < len(level_map)
                         depth = min(wall_depths[(tile_idx, row_idx)], 2)
                         Wall(*context, depth, needs_face)
                     case 'P':
@@ -107,12 +105,12 @@ class GameManager:
     def _init_assets(self):
         self._assets: Assets = {
             'shadows': {},
-            'floor': loader.load_folder('assets/grass'),
+            'floor': loader.load_arr('assets/grass'),
             'walls': {
-                'tops': loader.load_folder('assets/walls/tops'),
+                'tops': loader.load_arr('assets/walls/tops'),
                 'face': loader.load_asset('assets/walls/wall_face.png')
             },
-            'weapons': loader.load_collection('assets/weapons'),
+            'weapons': loader.load_dict('assets/weapons'),
             'player': loader.load_asset('assets/player.png'),
             'skeleton': loader.load_asset('assets/skeleton.png'),
             'projectile': loader.load_asset('assets/projectile.png')

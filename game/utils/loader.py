@@ -3,19 +3,19 @@ from pathlib import Path
 import pygame as pg
 
 
-def load_collection(path):
-    collection = {
+def load_dict(path):
+    assets = {
         file.stem: load_asset(file)
         for file in _get_files(path)
     }
-    return collection
+    return assets
 
-def load_folder(path):
-    folder = tuple(
+def load_arr(path):
+    assets = tuple(
         _load_image(file)
         for file in sorted(_get_files(path))
     )
-    return folder
+    return assets
 
 def load_asset(file):
     return (_load_image(file),)

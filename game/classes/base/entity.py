@@ -6,6 +6,7 @@ import pygame as pg
 
 from .component import Component
 from .body import Body
+from ... import config as cfg
 from ...utils import generate_entity_shadow
 
 from typing import TYPE_CHECKING
@@ -42,7 +43,7 @@ class Entity(Body, ABC):
             )
         
     def _handle_collision(self, _):
-        return 'STOP'
+        return cfg.CollisionAction.STOP
 
     def take_damage(self, amount):
         self.hp -= amount

@@ -1,6 +1,5 @@
 from __future__ import annotations
-from abc import ABC, abstractmethod
-from typing import final, TYPE_CHECKING
+from abc import ABC
 
 import pygame as pg
 
