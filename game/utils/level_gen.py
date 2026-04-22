@@ -38,7 +38,9 @@ class LevelGenerator:
         return self._map_data
 
     def _generate(self):
-        self._map_data = [['W'] * self.width for _ in range(self.height)]
+        self._map_data = [
+            [cfg.GameObject.WALL] * self.width for _ in range(self.height)
+            ]
         mid_x, mid_y = self.width // 2, self.height // 2
         self._carve_floor(mid_x, mid_y)
         total_tiles = self.width * self.height
@@ -58,7 +60,7 @@ class LevelGenerator:
             extra_x = pos_x + int(vector.y)
             extra_y = pos_y + int(vector.x)
             for x, y in ((pos_x, pos_y), (extra_x, extra_y)):
-                if self._map_data[y][x] == 'W':
+                if self._map_data[y][x] is cfg.GameObject.WALL:
                     self._carve_floor(x, y)
                     current_floors += 1
             if random() < self.turn_chance:
@@ -73,7 +75,7 @@ class LevelGenerator:
                 walkers.remove(walker)
     
     def _carve_floor(self, x, y):
-        self._map_data[y][x] = '.'
+        self._map_data[y][x] = cfg.GameObject.FLOOR
         self._floor_tiles.add((x, y))
 
     def _spawn_objects(self):
@@ -95,7 +97,7 @@ class LevelGenerator:
         for y in range(player_pos[1]-1, player_pos[1]+2):
             for x in range(player_pos[0]-1, player_pos[0]+2):
                 self._carve_floor(x, y)
-        self._map_data[player_pos[1]][player_pos[0]] = 'P'
+        self._map_data[player_pos[1]][player_pos[0]] = cfg.GameObject.PLAYER
         SAFE_RADIUS_TILES = (
             cfg.ENEMIES['skeleton']['general']['detection_radius']
             / cfg.TILE_SIZE
@@ -108,11 +110,11 @@ class LevelGenerator:
         actual_enemy_amount = min(self.enemy_amount, len(enemy_pos_candidates))
         enemy_positions = sample(enemy_pos_candidates, actual_enemy_amount)
         for enemy_pos in enemy_positions:
-            self._map_data[enemy_pos[1]][enemy_pos[0]] = 'E'
+            self._map_data[enemy_pos[1]][enemy_pos[0]] = cfg.GameObject.ENEMY
     
 
 class Walker:
-    DIRECTIONS = [(1, 0), (0, 1), (-1, 0), (0, -1)]
+    DIRECTIONS = ((1, 0), (0, 1), (-1, 0), (0, -1))
 
     def __init__(self, x, y):
         self.pos = pg.Vector2(x, y)
@@ -122,7 +124,7 @@ class Walker:
         self.pos += self.vector
 
     def turn(self):
-        candidates = self.DIRECTIONS.copy()
+        candidates = list(self.DIRECTIONS)
         candidates.remove(self.vector)
         self.vector.update(choice(candidates))
 

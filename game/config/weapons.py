@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .core import LAYERS, AssetType
+from .core import Layers, AssetType
 from ..utils import merge_defaults
 
 from typing import TYPE_CHECKING
@@ -23,7 +23,7 @@ WEAPONS: dict[str, StatsLeaf] = {
         'general': {
             'proj_stats': {
                 'render': {
-                    'layer': LAYERS['projectile'],
+                    'layer': Layers.PROJECTILE,
                     'asset_path': 'projectile',
                     'asset_type': AssetType.SINGLE
                     }

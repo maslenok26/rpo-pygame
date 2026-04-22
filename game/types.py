@@ -20,31 +20,22 @@ class SpriteGroups(TypedDict):
 
     
 class WallAssets(TypedDict):
-    tops: tuple[pg.Surface]
-    face: tuple[pg.Surface]
+    tops: dict[str, pg.Surface]
+    face: pg.Surface
 
 class Assets(TypedDict):
-    shadows: dict[str, tuple[pg.Surface]]
-    floor: tuple[pg.Surface]
+    shadows: dict[str, pg.Surface]
+    floor: dict[str, pg.Surface]
     walls: WallAssets
-    weapons: dict[str, tuple[pg.Surface]]
-    player: tuple[pg.Surface]
-    enemy: tuple[pg.Surface]
-    revolver: tuple[pg.Surface]
-    shotgun: tuple[pg.Surface]
-    projectile: tuple[pg.Surface]
+    weapons: dict[str, pg.Surface]
+    player: pg.Surface
+    enemy: pg.Surface
+    revolver: pg.Surface
+    shotgun: pg.Surface
+    projectile: pg.Surface
 
 
 # ТИПЫ ДЛЯ CONFIG/
-class Layers(TypedDict):
-    shadow: int
-    wall_face: int
-    enemy: int
-    player: int
-    projectile: int
-    wall_top: int
-
-
 class FactionRule(TypedDict):
     proj_self_group_key: str
     proj_target_group_keys: tuple[str]

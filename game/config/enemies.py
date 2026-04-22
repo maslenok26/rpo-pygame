@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .core import LAYERS, AssetType
+from .core import Layers, AssetType
 from ..utils import merge_defaults
 
 from typing import TYPE_CHECKING
@@ -13,7 +13,7 @@ ENEMIES: dict[str, StatsLeaf] = {
             'faction': 'enemy'
         },
         'render': {
-            'layer': LAYERS['enemy'],
+            'layer': Layers.ENEMY,
             'asset_type': AssetType.SINGLE
         }
         },

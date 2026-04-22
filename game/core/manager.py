@@ -77,23 +77,19 @@ class GameManager:
             for tile_idx, tile in enumerate(row):
                 y = row_idx * cfg.TILE_SIZE
                 x = tile_idx * cfg.TILE_SIZE
-                self.static_surf.blit(choice(self._assets['floor']), (x, y))
+                self.static_surf.blit(choice(self._assets['grass']), (x, y))
                 spawn_pos = (x + (cfg.TILE_SIZE // 2), y + (cfg.TILE_SIZE // 2))
                 context = (self._sprite_groups, self._assets, spawn_pos)
                 match tile:
-                    case '.':
-                        pass
-                    case 'W':
+                    case cfg.GameObject.FLOOR: pass
+                    case cfg.GameObject.WALL:
                         needs_face = row_idx + 1 < len(level_map)
                         depth = min(wall_depths[(tile_idx, row_idx)], 2)
                         Wall(*context, depth, needs_face)
-                    case 'P':
-                        player = Player(*context)
-                    case 'E':
-                        Enemy(*context)
-                    case _:
-                        raise ValueError(
-                            f'Неизвестное обозначение объекта на карте: {tile}'
+                    case cfg.GameObject.PLAYER: player = Player(*context)
+                    case cfg.GameObject.ENEMY: Enemy(*context)
+                    case _: raise ValueError(
+                            f'Неизвестное обозначение объекта на карте'
                             )
         self._init_player(player)
 
@@ -109,18 +105,8 @@ class GameManager:
         self.layout = self._Layout(self.screen.size)
     
     def _init_assets(self):
-        self._assets: Assets = {
-            'shadows': {},
-            'floor': loader.load_arr('assets/grass'),
-            'walls': {
-                'tops': loader.load_arr('assets/walls/tops'),
-                'face': loader.load_asset('assets/walls/wall_face.png')
-            },
-            'weapons': loader.load_dict('assets/weapons'),
-            'player': loader.load_asset('assets/player.png'),
-            'skeleton': loader.load_asset('assets/skeleton.png'),
-            'projectile': loader.load_asset('assets/projectile.png')
-        }
+        self._assets: Assets = loader.load_tree('assets')
+        self._assets['shadows'] = {}
     
     def _init_sprite_groups(self):
         self._sprite_groups: SpriteGroups = {
@@ -139,7 +125,8 @@ class GameManager:
         queue = deque()
         for y in range(height):
             for x in range(width):
-                if level_map[y][x] == 'W': continue
+                if level_map[y][x] is cfg.GameObject.WALL:
+                    continue
                 depths[(x, y)] = -1
                 queue.append((x, y))
         while queue:

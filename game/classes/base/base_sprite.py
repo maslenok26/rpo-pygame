@@ -41,7 +41,7 @@ class BaseSprite(pg.sprite.Sprite):
 
     def _get_asset(self):
         current = self._assets
-        for key in self.asset_path.split(cfg.ASSET_PATH_SEP):
+        for key in self.asset_path.split(cfg.AssetPathSep.MAIN):
             current = current[key]
         return current
 
@@ -69,13 +69,13 @@ class BaseSprite(pg.sprite.Sprite):
             ):
         shadow_assets = self._assets['shadows']
         shadow_key = self.asset_path.replace(
-            cfg.ASSET_PATH_SEP, cfg.ASSET_PATH_SEP_ALT
+            cfg.AssetPathSep.MAIN, cfg.AssetPathSep.ALT
             )
         if shadow_key not in shadow_assets:
             shadow_assets[shadow_key] = gen_func(self.image)
         shadow_stats: StatsLeaf = {
             'render': {
-                'layer': cfg.LAYERS['shadow'],
+                'layer': cfg.Layers.SHADOW,
                 'asset_path': f'shadows.{shadow_key}',
                 'asset_type': cfg.AssetType.SINGLE
             }

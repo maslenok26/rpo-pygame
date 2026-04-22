@@ -1,52 +1,55 @@
-from __future__ import annotations
-from enum import Enum, auto
+from enum import Enum, IntEnum, StrEnum, auto
 
 import pygame as pg
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..types import Layers
-
-# ПАРАМЕТРЫ РАЗРЕШЕНИЯ
+# РАЗРЕШЕНИE
 GAME_WIDTH = 320
 GAME_HEIGHT = 240
-HEIGHTS = {'HD': 720, 'FHD': 1080, 'QHD': 1440, 'UHD': 2160}
-RESOLUTION = 'HD'
-START_SCREEN_SIZE = (HEIGHTS[RESOLUTION] * (16 / 9), HEIGHTS[RESOLUTION])
+START_SCREEN_SIZE = (1280, 720)
 LETTERBOXING = True
 TILE_SIZE = 16
 
-# ПАРАМЕТРЫ ФИЗИКИ
+# СМЕНА КАДРОВ
+FPS_LOCK = True
+FPS = 60
+GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH/2, GAME_HEIGHT/2)
+
+# ФИЗИКА
 SUB_STEP_LIMIT = 10
 EPSILON = 1e-3
 
-# ПАРАМЕТРЫ СМЕНЫ КАДРОВ
-FPS_LOCK = True
-FPS = 60
-
-# ПАРАМЕТРЫ ОТРИСОВКИ
-LAYERS: Layers = {
-    'shadow': 0,
-    'wall_face': 1,
-    'enemy': 3,
-    'player': 7,
-    'projectile': 9,
-    'wall_top': 10
-}
-BG_WALL_COLOR = (58, 68, 102)
-
-# ПРОЧИЕ КОНСТАНТЫ
-GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH / 2, GAME_HEIGHT / 2)
-ASSET_PATH_SEP = '.'
-ASSET_PATH_SEP_ALT = '/'
-
-# ENUM'Ы
 class CollisionAction(Enum):
     STOP = auto()
     PASS = auto()
     BOUNCE = auto()
     KILLSELF = auto()
 
+# ОТРИСОВКА
+class Layers(IntEnum):
+    SHADOW = 0
+    WALL_FACE = 1
+    ENEMY = 3
+    PLAYER = 7
+    PROJECTILE = 9
+    WALL_TOP = 10
+
+BG_WALL_COLOR = (58, 68, 102)
+
+# ЗАГРУЗКА АССЕТОВ
 class AssetType(Enum):
     SINGLE = auto()
     TUPLE = auto()
+
+class AssetPathSep(StrEnum):
+    MAIN = '.'
+    ALT = '/'
+
+ASSET_SUFFIX = '.png'
+SEQUENCE_SUFFIX = '.seq'
+
+# ГЕНЕРАЦИЯ КАРТЫ
+class GameObject(Enum):
+    FLOOR = auto()
+    WALL = auto()
+    PLAYER = auto()
+    ENEMY = auto()
