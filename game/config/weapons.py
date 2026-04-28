@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from .core import Layers, AssetType
-from ..utils import merge_defaults
+from .constants import Layer, AssetType
+from .merger import Tree
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import FactionRule, StatsLeaf
+    from ..types import FactionRule
 
 FACTION_RULES: dict[str, FactionRule] = {
     'player': {
@@ -18,86 +18,82 @@ FACTION_RULES: dict[str, FactionRule] = {
     }
 }
 
-WEAPONS: dict[str, StatsLeaf] = {
-    'default': {
+ASSET_PATH = 'weapons'
+WEAPONS = Tree(
+    defaults={
         'general': {
             'proj_stats': {
                 'render': {
-                    'layer': Layers.PROJECTILE,
+                    'layer': Layer.PROJECTILE,
                     'asset_path': 'projectile',
                     'asset_type': AssetType.SINGLE
+                }
+            }
+        },
+        'render': {
+                'asset_type': AssetType.SINGLE
+        }
+    },
+    content={
+        'revolver': {
+            'general': {
+                'orbit_offset': (8, 3),
+                'muzzle_offset': (9, -2),
+                'holstered_offset': (-5, -8),
+                'proj_amount': 1,
+                'spread_angle': 15,
+                'proj_stats': {
+                    'general': {
+                        'damage': 10,
+                        'bounces_left': 0
+                    },
+                    'physics': {
+                        'hitbox_size': (4, 4),
+                        'speed': 230,
+                        'drag': 0.15
+                    },
+                    'components': {
+                        'timers': {
+                            'lifetime': {'duration': 3000}
+                        }
                     }
                 }
             },
-            'render': {
-                'asset_type': AssetType.SINGLE
-            }
-        },
-    'revolver': {
-        'general': {
-            'orbit_offset': (8, 3),
-            'muzzle_offset': (9, -2),
-            'holstered_offset': (-5, -8),
-            'proj_amount': 1,
-            'spread_angle': 15,
-            'proj_stats': {
-                'general': {
-                    'damage': 10,
-                    'bounces_left': 0
-                },
-                'physics': {
-                    'hitbox_size': (4, 4),
-                    'speed': 230,
-                    'drag': 0.15
-                },
-                'components': {
-                    'timers': {
-                        'lifetime': {'duration': 3000}
-                    }
+            'components': {
+                'timers': {
+                    'shoot': {'cooldown': 150}
                 }
             }
         },
-        'render': {
-            'asset_path': 'weapons.revolver'
-        },
-        'components': {
-            'timers': {
-                'shoot': {'cooldown': 150}
-            }
-        }
-    },
-    'shotgun': {
-        'general': {
-            'orbit_offset': (3, 4),
-            'muzzle_offset': (19, -2),
-            'holstered_offset': (-3, -4),
-            'proj_amount': 5,
-            'spread_angle': 40,
-            'proj_stats': {
-                'general': {
-                    'damage': 8,
-                    'bounces_left': 2
-                },
-                'physics': {
-                    'hitbox_size': (4, 4),
-                    'speed': 160,
-                    'drag': 0.3
-                },
-                'components': {
-                    'timers': {
-                        'lifetime': {'duration': 1500}
+        'shotgun': {
+            'general': {
+                'orbit_offset': (3, 4),
+                'muzzle_offset': (19, -2),
+                'holstered_offset': (-3, -4),
+                'proj_amount': 5,
+                'spread_angle': 40,
+                'proj_stats': {
+                    'general': {
+                        'damage': 8,
+                        'bounces_left': 2
+                    },
+                    'physics': {
+                        'hitbox_size': (4, 4),
+                        'speed': 160,
+                        'drag': 0.3
+                    },
+                    'components': {
+                        'timers': {
+                            'lifetime': {'duration': 1500}
+                        }
                     }
                 }
-            }
-        },
-        'render': {
-            'asset_path': 'weapons.shotgun'
-        },
-        'components': {
-            'timers': {
-                'shoot': {'cooldown': 750}
+            },
+            'components': {
+                'timers': {
+                    'shoot': {'cooldown': 750}
+                }
             }
         }
     }
-}
-merge_defaults(WEAPONS)
+).merge_defaults(asset_path=ASSET_PATH)

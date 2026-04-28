@@ -4,7 +4,6 @@ from .manager import GameManager
 
 
 def mainloop(gm: GameManager):
-
     gm.init_level()
 
     fps = gm.get_fps()

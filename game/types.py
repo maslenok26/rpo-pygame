@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict, NotRequired
+from typing import TYPE_CHECKING, TypedDict, NotRequired, Literal
 
 import pygame as pg
 
@@ -18,27 +18,11 @@ class SpriteGroups(TypedDict):
     enemy_projectiles: pg.sprite.Group[Projectile]
     entity_components: pg.sprite.Group[BaseSprite]
 
-    
-class WallAssets(TypedDict):
-    tops: dict[str, pg.Surface]
-    face: pg.Surface
-
-class Assets(TypedDict):
-    shadows: dict[str, pg.Surface]
-    floor: dict[str, pg.Surface]
-    walls: WallAssets
-    weapons: dict[str, pg.Surface]
-    player: pg.Surface
-    enemy: pg.Surface
-    revolver: pg.Surface
-    shotgun: pg.Surface
-    projectile: pg.Surface
-
 
 # ТИПЫ ДЛЯ CONFIG/
 class FactionRule(TypedDict):
     proj_self_group_key: str
-    proj_target_group_keys: tuple[str]
+    proj_target_group_keys: tuple[str, ...]
 
 
 class GeneralStats(TypedDict):
@@ -75,12 +59,19 @@ class RenderStats(TypedDict):
     y_offset: NotRequired[int]
 
 class ComponentsStats(TypedDict):
-    timers: NotRequired[dict[str, dict[str, int]]]
+    timers: NotRequired[dict[str, TimerStats]]
     # entity
-    start_weapon_keys: NotRequired[tuple[str]]
+    start_weapon_keys: NotRequired[tuple[str, ...]]
+
+class TimerStats(TypedDict):
+    duration: NotRequired[int]
+    cooldown: NotRequired[int]
 
 class StatsLeaf(TypedDict):
     general: NotRequired[GeneralStats]
     physics: NotRequired[PhysicsStats]
     render: NotRequired[RenderStats]
     components: NotRequired[ComponentsStats]
+
+type TreeContent = dict[str, StatsLeaf | cfg.Tree]
+type MergedTree = dict[str, StatsLeaf | MergedTree]

@@ -8,9 +8,9 @@ ASSET_PATTERN = f'*{cfg.ASSET_SUFFIX}'
 
 def load_tree(path):
     path = Path(path)
-    assets_dict = {}
     if not path.is_dir():
         raise ValueError('Дерево ассетов должно быть директорией')
+    assets_dict = {}
     for subpath in path.iterdir():
         key = subpath.stem
         if subpath.is_file() and subpath.suffix == cfg.ASSET_SUFFIX:

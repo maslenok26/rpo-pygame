@@ -2,13 +2,14 @@ from collections import deque
 from random import choice
 import pygame as pg
 
+from . import asset_loader
+from .level_gen import LevelGenerator
 from ..classes import Camera, Wall, Enemy, Player, ComponentGroup
-from ..utils import LevelGenerator, loader
 from .. import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..types import SpriteGroups, Assets
+    from ..types import SpriteGroups
 
 
 class GameManager:
@@ -105,7 +106,7 @@ class GameManager:
         self.layout = self._Layout(self.screen.size)
     
     def _init_assets(self):
-        self._assets: Assets = loader.load_tree('assets')
+        self._assets = asset_loader.load_tree('assets')
         self._assets['shadows'] = {}
     
     def _init_sprite_groups(self):

@@ -8,12 +8,11 @@ from ... import config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from ...types import SpriteGroups, Assets, StatsLeaf
+    from ...types import SpriteGroups, StatsLeaf
 
 
 class BaseSprite(pg.sprite.Sprite):
     _sprite_groups: SpriteGroups
-    _assets: Assets
     image_idx = 0
 
     def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
@@ -24,20 +23,20 @@ class BaseSprite(pg.sprite.Sprite):
 
         self.rect = pg.Rect(*pos, 0, 0)
         render = stats.get('render')
-        if render:
-            if 'layer' in render:
-                self._layer = render['layer']
-                self._add_to_groups('rendering')
-            self.asset_path = render['asset_path']
-            asset = self._get_asset()
-            match render['asset_type']:
-                case cfg.AssetType.SINGLE:
-                    self.orig_image = asset
-                case cfg.AssetType.TUPLE:
-                    self.orig_image = asset[self.image_idx]
-                case _:
-                    raise ValueError('Неизвестный тип ассета')
-            self._set_image(self.orig_image)
+        if render is None: return
+        if cfg.CfgKey.Render.LAYER in render:
+            self._layer = render['layer']
+            self._add_to_groups('rendering')
+        self.asset_path = render['asset_path']
+        asset = self._get_asset()
+        match render['asset_type']:
+            case cfg.AssetType.SINGLE:
+                self.orig_image = asset
+            case cfg.AssetType.TUPLE:
+                self.orig_image = asset[self.image_idx]
+            case _:
+                raise ValueError('Неизвестный тип ассета')
+        self._set_image(self.orig_image)
 
     def _get_asset(self):
         current = self._assets
@@ -75,7 +74,7 @@ class BaseSprite(pg.sprite.Sprite):
             shadow_assets[shadow_key] = gen_func(self.image)
         shadow_stats: StatsLeaf = {
             'render': {
-                'layer': cfg.Layers.SHADOW,
+                'layer': cfg.Layer.SHADOW,
                 'asset_path': f'shadows.{shadow_key}',
                 'asset_type': cfg.AssetType.SINGLE
             }

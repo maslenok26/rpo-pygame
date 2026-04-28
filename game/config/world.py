@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .core import TILE_SIZE, Layers, AssetType
+from .constants import TILE_SIZE, Layer, AssetType
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING: 
@@ -11,16 +11,16 @@ WALL: StatsLeaf = {
         'hitbox_size': (TILE_SIZE, TILE_SIZE)
     },
     'render': {
-        'layer': Layers.WALL_TOP,
+        'layer': Layer.WALL_TOP,
         'asset_path': 'walls.tops',
         'asset_type': AssetType.TUPLE,
-        'y_offset': 4
+        'y_offset': 4   # высота текстуры лица стены / 2
     }
 }
 
 WALL_FACE: StatsLeaf = {
     'render': {
-        'layer': Layers.WALL_FACE,
+        'layer': Layer.WALL_FACE,
         'asset_path': 'walls.wall_face',
         'asset_type': AssetType.SINGLE
     }

@@ -1,5 +1,5 @@
 from . import BaseSprite, HitboxSprite
-from ..utils import generate_obstacle_shadow
+from ..dynamic_assets import generate_obstacle_shadow
 from .. import config as cfg
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .core import Layers, AssetType
+from .constants import Layer, AssetType
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -16,8 +16,8 @@ PLAYER: StatsLeaf = {
         'speed': 120,
         'dash_speed': 300
         },
-    'render':{
-        'layer': Layers.PLAYER,
+    'render': {
+        'layer': Layer.PLAYER,
         'asset_path': 'player',
         'asset_type': AssetType.SINGLE
         },

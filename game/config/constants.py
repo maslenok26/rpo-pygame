@@ -9,10 +9,11 @@ START_SCREEN_SIZE = (1280, 720)
 LETTERBOXING = True
 TILE_SIZE = 16
 
+GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH/2, GAME_HEIGHT/2)
+
 # СМЕНА КАДРОВ
 FPS_LOCK = True
 FPS = 60
-GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH/2, GAME_HEIGHT/2)
 
 # ФИЗИКА
 SUB_STEP_LIMIT = 10
@@ -25,11 +26,16 @@ class CollisionAction(Enum):
     KILLSELF = auto()
 
 # ОТРИСОВКА
-class Layers(IntEnum):
+class Layer(IntEnum):
     SHADOW = 0
     WALL_FACE = 1
+    # 2: оружие врага (угол < 0°)
     ENEMY = 3
+    # 4: оружие врага (угол >= 0°)
+    # 5: оружие за спиной игрока
+    # 6: оружие игрока (угол < 0°)
     PLAYER = 7
+    # 8: оружие игрока (угол >= 0°)
     PROJECTILE = 9
     WALL_TOP = 10
 
@@ -53,3 +59,14 @@ class GameObject(Enum):
     WALL = auto()
     PLAYER = auto()
     ENEMY = auto()
+
+# КОНФИГИ
+class CfgKey:
+    class Leaf(StrEnum):
+        GENERAL = 'general'
+        PHYSICS = 'physics'
+        RENDER = 'render'
+        COMPONENTS = 'components'
+
+    class Render(StrEnum):
+        LAYER = 'layer'

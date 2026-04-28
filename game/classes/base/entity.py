@@ -7,7 +7,7 @@ import pygame as pg
 from .component import Component
 from .body import Body
 from ... import config as cfg
-from ...utils import generate_entity_shadow
+from ...dynamic_assets import generate_entity_shadow
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
