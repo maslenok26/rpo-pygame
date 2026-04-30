@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 
 class BaseSprite(pg.sprite.Sprite):
     _sprite_groups: SpriteGroups
+    _assets: dict[str, pg.Surface | tuple[pg.Surface, ...]]
     image_idx = 0
 
     def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
@@ -28,7 +29,7 @@ class BaseSprite(pg.sprite.Sprite):
             self._layer = render['layer']
             self._add_to_groups('rendering')
         self.asset_path = render['asset_path']
-        asset = self._get_asset()
+        asset = self._assets[self.asset_path]
         match render['asset_type']:
             case cfg.AssetType.SINGLE:
                 self.orig_image = asset
@@ -37,12 +38,6 @@ class BaseSprite(pg.sprite.Sprite):
             case _:
                 raise ValueError('Неизвестный тип ассета')
         self._set_image(self.orig_image)
-
-    def _get_asset(self):
-        current = self._assets
-        for key in self.asset_path.split(cfg.AssetPathSep.MAIN):
-            current = current[key]
-        return current
 
     def _set_image(self, image: pg.Surface):
         self.image = image
@@ -66,16 +61,14 @@ class BaseSprite(pg.sprite.Sprite):
     def _get_shadow_stats(
             self, gen_func: Callable[[pg.Surface], pg.Surface]
             ):
-        shadow_assets = self._assets['shadows']
-        shadow_key = self.asset_path.replace(
-            cfg.AssetPathSep.MAIN, cfg.AssetPathSep.ALT
-            )
-        if shadow_key not in shadow_assets:
-            shadow_assets[shadow_key] = gen_func(self.image)
+        shadow_asset_path = (
+            cfg.SHADOW_PREFIX + cfg.ASSET_PATH_SEP + self.asset_path
+        )
+        self._assets.setdefault(shadow_asset_path, gen_func(self.image))
         shadow_stats: StatsLeaf = {
             'render': {
                 'layer': cfg.Layer.SHADOW,
-                'asset_path': f'shadows.{shadow_key}',
+                'asset_path': shadow_asset_path,
                 'asset_type': cfg.AssetType.SINGLE
             }
         }

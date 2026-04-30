@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 
-from .constants import CfgKey, AssetPathSep
+from .constants import CfgKey, ASSET_PATH_SEP
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class Tree(dict):
         has_assets = asset_path is not None
         for key, value in self.items():
             cur_asset_path = (
-                asset_path + AssetPathSep.MAIN + key
+                asset_path + ASSET_PATH_SEP + key
                 if has_assets else None
             )
             value: StatsLeaf | Tree

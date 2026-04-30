@@ -3,13 +3,12 @@ from enum import Enum, IntEnum, StrEnum, auto
 import pygame as pg
 
 # РАЗРЕШЕНИE
-GAME_WIDTH = 320
-GAME_HEIGHT = 240
+GAME_SURF_SIZE = pg.Vector2(320, 240)
 START_SCREEN_SIZE = (1280, 720)
 LETTERBOXING = True
 TILE_SIZE = 16
 
-GAME_SURF_CENTER = pg.Vector2(GAME_WIDTH/2, GAME_HEIGHT/2)
+GAME_SURF_CENTER = GAME_SURF_SIZE / 2
 
 # СМЕНА КАДРОВ
 FPS_LOCK = True
@@ -46,12 +45,13 @@ class AssetType(Enum):
     SINGLE = auto()
     TUPLE = auto()
 
-class AssetPathSep(StrEnum):
-    MAIN = '.'
-    ALT = '/'
+ASSET_PATH_SEP = '.'
 
 ASSET_SUFFIX = '.png'
 SEQUENCE_SUFFIX = '.seq'
+
+SHADOW_PREFIX = 'shadow'
+SHADOW_COLOR_RGBA = (0, 0, 0, 100)
 
 # ГЕНЕРАЦИЯ КАРТЫ
 class GameObject(Enum):

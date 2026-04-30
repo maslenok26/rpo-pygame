@@ -6,7 +6,6 @@ from .. import config as cfg
 class Wall(HitboxSprite):
     def __init__(self, sprite_groups, assets, pos, depth, needs_face):
         stats = cfg.WALL
-        Y_OFFSET = stats['render']['y_offset']
         self.image_idx = depth
 
         super().__init__(sprite_groups, assets, pos, stats)
@@ -17,12 +16,16 @@ class Wall(HitboxSprite):
             self.face = BaseSprite(
                 sprite_groups, assets, self.rect.midbottom, cfg.WALL_FACE
             )
-            shadow_stats = self._get_shadow_stats(generate_obstacle_shadow)
+            shadow_stats = (
+                self._get_shadow_stats(generate_obstacle_shadow)
+            )
             self.shadow = BaseSprite(
                 sprite_groups, assets, self.face.rect.midbottom, shadow_stats
             )
             self.kill = self._kill_with_components
-        self.rect.centery -= Y_OFFSET
+        # стена сдвигается на оффсет. благодаря тому что сдвиг происходит в
+        # конце, лицо и тень стены остаются на нужных местах.
+        self.rect.centery -= stats['render']['y_offset']
 
     def _kill_with_components(self):
         self.face.kill()

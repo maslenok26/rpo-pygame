@@ -25,9 +25,6 @@ ENEMIES = Tree(
                 'hitbox_size': (10, 14),
                 'speed': 50
             },
-            'render': {
-                'asset_path': 'skeleton'
-            },
             'components': {
                 'timers': {
                     'shoot': {'cooldown': 1000}

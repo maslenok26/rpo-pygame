@@ -14,7 +14,7 @@ class Camera:
         self.lerp_speed = 12.25
         self.mouse_sensitivity = 0.35
 
-        self.rect = pg.Rect(0, 0, cfg.GAME_WIDTH, cfg.GAME_HEIGHT)
+        self.rect = pg.Rect(0, 0, *cfg.GAME_SURF_SIZE)
         
         self.pos = pg.Vector2()
 
@@ -26,8 +26,8 @@ class Camera:
     def update(self, dt, target: Player, mouse_pos: pg.Vector2):
         lerp_value = min(self.lerp_speed*dt, 1)
         self.pos = self.pos.lerp(
-            target.pos + round(mouse_pos * self.mouse_sensitivity),
+            target.pos + round(mouse_pos*self.mouse_sensitivity),
             lerp_value
             )
-        self.target_dist = round(target.pos - self.pos)
+        self.target_dist = round(target.pos-self.pos)
         self.rect.center = target.rect.center - self.target_dist

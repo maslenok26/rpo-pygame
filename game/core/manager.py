@@ -28,8 +28,10 @@ class GameManager:
             (pg.mouse.get_pos() - self.layout.offset) / self.layout.scale
         )
         if cfg.LETTERBOXING:
-            mouse_pos.x = pg.math.clamp(mouse_pos.x, 0, cfg.GAME_WIDTH)
-            mouse_pos.y = pg.math.clamp(mouse_pos.y, 0, cfg.GAME_HEIGHT)
+            mouse_pos.update(
+                pg.math.clamp(mouse_pos.x, 0, cfg.GAME_SURF_SIZE.x),
+                pg.math.clamp(mouse_pos.y, 0, cfg.GAME_SURF_SIZE.y)
+            )
         return mouse_pos - cfg.GAME_SURF_CENTER
     
     def update(self, dt):
@@ -76,10 +78,11 @@ class GameManager:
             sprite_group.empty()
         for row_idx, row in enumerate(level_map):
             for tile_idx, tile in enumerate(row):
-                y = row_idx * cfg.TILE_SIZE
-                x = tile_idx * cfg.TILE_SIZE
-                self.static_surf.blit(choice(self._assets['grass']), (x, y))
-                spawn_pos = (x + (cfg.TILE_SIZE // 2), y + (cfg.TILE_SIZE // 2))
+                topleft = tuple(idx * cfg.TILE_SIZE for idx in (tile_idx, row_idx))
+                # для пола указывается top-left коорда
+                self.static_surf.blit(choice(self._assets['grass']), topleft)
+                # для тел указывается коорда центра, все выровняется после установки картинки
+                spawn_pos = tuple(axis + cfg.TILE_SIZE // 2 for axis in topleft)
                 context = (self._sprite_groups, self._assets, spawn_pos)
                 match tile:
                     case cfg.GameObject.FLOOR: pass
@@ -102,12 +105,11 @@ class GameManager:
         self.screen = pg.display.set_mode(
             cfg.START_SCREEN_SIZE, flags=display_flags, vsync=1
             )
-        self.game_surf = pg.Surface((cfg.GAME_WIDTH, cfg.GAME_HEIGHT))
+        self.game_surf = pg.Surface(cfg.GAME_SURF_SIZE)
         self.layout = self._Layout(self.screen.size)
     
     def _init_assets(self):
-        self._assets = asset_loader.load_tree('assets')
-        self._assets['shadows'] = {}
+        self._assets = asset_loader.load_assets('assets')
     
     def _init_sprite_groups(self):
         self._sprite_groups: SpriteGroups = {
@@ -153,18 +155,17 @@ class GameManager:
     class _Layout:
         def __init__(self, screen_size):
             self.offset = pg.Vector2()
+            self.size = pg.Vector2()
             self.update(screen_size)
         
-        def update(self, screen_size):
-            screen_width, screen_height = screen_size
-            scales = (
-                screen_width / cfg.GAME_WIDTH, screen_height / cfg.GAME_HEIGHT
+        def update(self, screen_size: tuple[int, int]):
+            scales = tuple(
+                size1 / size2
+                for size1, size2 in zip(screen_size, cfg.GAME_SURF_SIZE)
                 )
             scale = min(scales) if cfg.LETTERBOXING else max(scales)
-            scaled_width = cfg.GAME_WIDTH * scale
-            scaled_height = cfg.GAME_HEIGHT * scale
-            offset_x = (screen_width - scaled_width) // 2
-            offset_y = (screen_height - scaled_height) // 2
+            scaled_size = cfg.GAME_SURF_SIZE * scale
+            offsets = (screen_size - scaled_size) // 2 
             self.scale = scale
-            self.offset.update(offset_x, offset_y)
-            self.size = (int(scaled_width), int(scaled_height))
+            self.offset.update(*offsets)
+            self.size.update(*(int(axis) for axis in scaled_size))
