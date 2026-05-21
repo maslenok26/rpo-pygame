@@ -1,11 +1,11 @@
 from collections import deque
 from random import choice
+
 import pygame as pg
 
 from . import asset_loader
 from .level_gen import LevelGenerator
-from ..classes import Camera, Wall, Enemy, Player, ComponentGroup
-from .. import config as cfg
+from .. import classes, config as cfg
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -14,8 +14,7 @@ if TYPE_CHECKING:
 
 class GameManager:
     def __init__(self):
-        self.clock = pg.time.Clock()
-        self.camera = Camera()
+        self.camera = classes.Camera()
         self._init_display()
         self._init_assets()
         self._init_sprite_groups()
@@ -40,6 +39,7 @@ class GameManager:
         self._sprite_groups['enemies'].update(dt)
         self._sprite_groups['player_projectiles'].update(dt)
         self._sprite_groups['enemy_projectiles'].update(dt)
+        self._sprite_groups['ui'].update()
         mouse_screen_pos = self.get_mouse_screen_pos()
         self.camera.update(dt, self.player, mouse_screen_pos)
         player_to_mouse_vec = mouse_screen_pos - self.camera.target_dist
@@ -49,17 +49,17 @@ class GameManager:
 
     def draw(self):
         self.game_surf.fill(cfg.BG_WALL_COLOR)
-        self.screen.fill((0, 0, 0))
         camera_offset = self.camera.get_offset()
         self.game_surf.blit(self.static_surf, camera_offset)
-        for sprite in self._sprite_groups['rendering']:
+        for sprite in self._sprite_groups['world_render']:
             self.game_surf.blit(sprite.image, sprite.rect.move(camera_offset))
+        self._sprite_groups['ui'].draw(self.game_surf)
         scaled_game_surf = pg.transform.scale(
             self.game_surf, self.layout.size
             )
         self.screen.blit(scaled_game_surf, self.layout.offset)
 
-    def init_level(self, level_map: list[str]=None):
+    def init_level(self, level_map=None):
         if level_map is None:
             level_map = LevelGenerator(
                 width=40, height=40, floor_percent=0.3,
@@ -71,31 +71,37 @@ class GameManager:
         height = len(level_map)
         wall_depths = self._get_wall_depths(level_map, (width, height))
         self.static_surf = pg.Surface(
-            ((width-1)*cfg.TILE_SIZE, (height-1)*cfg.TILE_SIZE)
+            tuple((dim-1)*cfg.TILE_SIZE for dim in (width, height))
             )
         sprite_group: pg.sprite.AbstractGroup
         for sprite_group in self._sprite_groups.values():
             sprite_group.empty()
         for row_idx, row in enumerate(level_map):
             for tile_idx, tile in enumerate(row):
-                topleft = tuple(idx * cfg.TILE_SIZE for idx in (tile_idx, row_idx))
+                map_idx_pos = (tile_idx, row_idx)
+                topleft = tuple(idx*cfg.TILE_SIZE for idx in map_idx_pos)
                 # для пола указывается top-left коорда
                 self.static_surf.blit(choice(self._assets['grass']), topleft)
-                # для тел указывается коорда центра, все выровняется после установки картинки
-                spawn_pos = tuple(axis + cfg.TILE_SIZE // 2 for axis in topleft)
-                context = (self._sprite_groups, self._assets, spawn_pos)
+                # для тел указывается коорда центра, все выровняется после
+                # установки картинки
+                spawn_pos = tuple(axis+cfg.TILE_SIZE//2 for axis in topleft)
+                context = (self._sprite_groups, self._assets)
+                world_context = context + (spawn_pos,)
                 match tile:
                     case cfg.GameObject.FLOOR: pass
                     case cfg.GameObject.WALL:
                         needs_face = row_idx + 1 < len(level_map)
-                        depth = min(wall_depths[(tile_idx, row_idx)], 2)
-                        Wall(*context, depth, needs_face)
-                    case cfg.GameObject.PLAYER: player = Player(*context)
-                    case cfg.GameObject.ENEMY: Enemy(*context)
+                        depth = min(wall_depths[map_idx_pos], 2)
+                        classes.Wall(*world_context, depth, needs_face)
+                    case cfg.GameObject.PLAYER:
+                        player = classes.Player(*world_context)
+                    case cfg.GameObject.ENEMY:
+                        classes.Enemy(*world_context, 'skeleton')
                     case _: raise ValueError(
                             f'Неизвестное обозначение объекта на карте'
                             )
         self._init_player(player)
+        classes.HPBar(*context, player)
 
     def resize(self):
         self.layout.update(self.screen.size)
@@ -103,7 +109,7 @@ class GameManager:
     def _init_display(self):
         display_flags = pg.HWSURFACE | pg.DOUBLEBUF | pg.RESIZABLE
         self.screen = pg.display.set_mode(
-            cfg.START_SCREEN_SIZE, flags=display_flags, vsync=1
+            cfg.START_SCREEN_SIZE, flags=display_flags, vsync=cfg.VSYNC
             )
         self.game_surf = pg.Surface(cfg.GAME_SURF_SIZE)
         self.layout = self._Layout(self.screen.size)
@@ -113,13 +119,14 @@ class GameManager:
     
     def _init_sprite_groups(self):
         self._sprite_groups: SpriteGroups = {
-            'rendering': pg.sprite.LayeredUpdates(),
+            'world_render': pg.sprite.LayeredUpdates(),
             'obstacles': pg.sprite.Group(),
             'player': pg.sprite.GroupSingle(),
             'enemies': pg.sprite.Group(),
             'player_projectiles': pg.sprite.Group(),
             'enemy_projectiles': pg.sprite.Group(),
-            'entity_components': ComponentGroup()
+            'entity_components': classes.ComponentGroup(),
+            'ui': pg.sprite.Group()
         }
 
     def _get_wall_depths(self, level_map, level_size):
@@ -146,11 +153,10 @@ class GameManager:
                 queue.append((cur_x, cur_y))
         return depths
 
-    def _init_player(self, player: Player):
+    def _init_player(self, player: classes.Player):
         self.player = player
         for enemy in self._sprite_groups['enemies']:
             enemy.target = player
-
 
     class _Layout:
         def __init__(self, screen_size):
@@ -159,13 +165,10 @@ class GameManager:
             self.update(screen_size)
         
         def update(self, screen_size: tuple[int, int]):
-            scales = tuple(
-                size1 / size2
-                for size1, size2 in zip(screen_size, cfg.GAME_SURF_SIZE)
-                )
+            scales = pg.Vector2(screen_size).elementwise() / cfg.GAME_SURF_SIZE
             scale = min(scales) if cfg.LETTERBOXING else max(scales)
             scaled_size = cfg.GAME_SURF_SIZE * scale
             offsets = (screen_size - scaled_size) // 2 
             self.scale = scale
-            self.offset.update(*offsets)
-            self.size.update(*(int(axis) for axis in scaled_size))
+            self.offset.update(offsets)
+            self.size.update(*(int(size_dim) for size_dim in scaled_size))

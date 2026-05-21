@@ -34,17 +34,16 @@ class Weapon(Component):
         self.proj_amount = general['proj_amount']
         self.spread_angle = general['spread_angle']
 
-        self._orig_layer = owner._layer
-        self._layer = self._orig_layer
-        self._add_to_groups('rendering')
-
         self.vector = owner.look_vec
         
         self.holstered_image = pg.transform.rotate(
             self.image, -self.holstered_angle
             )
 
-        self._init_timers(stats, shoot=None)
+        self._init_timers(shoot=None)
+
+    def _set_layer(self):
+        self.layer = self._orig_layer = self.owner.layer
 
     def equip(self):
         self.is_active = True
@@ -54,7 +53,7 @@ class Weapon(Component):
     def unequip(self):
         self.is_active = False
         self._layer = self._orig_layer - 2
-        self._sprite_groups['rendering'].change_layer(self, self._layer)
+        self._sprite_groups['world_render'].change_layer(self, self._layer)
 
     def shoot(self):
         if not self.timers['shoot'].start(): return
@@ -97,15 +96,15 @@ class Weapon(Component):
         angle = self.vector.angle
         if self.owner.image_flipped:
             image_to_rotate = pg.transform.flip(
-                self.orig_image, flip_x=False, flip_y=True
+                self._orig_image, flip_x=False, flip_y=True
                 )
         else:
-            image_to_rotate = self.orig_image
+            image_to_rotate = self._orig_image
         self._set_image(pg.transform.rotate(image_to_rotate, -angle))
         layer_offset = copysign(1, angle)
         new_layer = self._orig_layer + layer_offset
         if new_layer != self._layer:
-            self._sprite_groups['rendering'].change_layer(self, new_layer)
+            self._sprite_groups['world_render'].change_layer(self, new_layer)
 
     def _rotate_image_holstered(self):
         offset = self.holstered_offset.copy()

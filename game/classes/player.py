@@ -12,14 +12,14 @@ class Player(Entity):
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._add_to_groups('player')
+        self._sprite_groups['player'].add(self)
 
         physics = stats['physics']
         
         self.base_speed = physics['speed']
         self.dash_speed = physics['dash_speed']
 
-        self._init_timers(stats, dash=self._stop_dash)
+        self._init_timers(dash=self._stop_dash)
 
     def update_movement(self, dt):
         self._get_movement_input()

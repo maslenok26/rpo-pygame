@@ -1,12 +1,17 @@
+from __future__ import annotations
 from pathlib import Path
 
 import pygame as pg
 
 from .. import config as cfg
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..types import Assets
+
 ASSET_PATTERN = f'*{cfg.ASSET_SUFFIX}'
 
-def load_assets(path, assets_dict=None, prefix=None):
+def load_assets(path, assets_dict=None, prefix=None) -> Assets:
     path = Path(path)
     if not path.is_dir():
         raise ValueError('Дерево ассетов должно быть директорией')

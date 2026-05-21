@@ -13,12 +13,12 @@ if TYPE_CHECKING:
 class Enemy(Entity):
     target: Player | None
 
-    def __init__(self, sprite_groups, assets, pos):
-        stats = cfg.ENEMIES['skeleton']
+    def __init__(self, sprite_groups, assets, pos, type_key):
+        stats = cfg.ENEMIES[type_key]
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._add_to_groups('enemies')
+        self._sprite_groups['enemies'].add(self)
 
         general = stats['general']
         
@@ -26,7 +26,7 @@ class Enemy(Entity):
         self.shoot_radius = general['shoot_radius']
         self.stop_radius = general['stop_radius']
 
-        self._init_timers(stats, shoot=None)
+        self._init_timers(shoot=None)
 
         self.target = None
         self.target_dist = 0

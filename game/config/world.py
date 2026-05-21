@@ -13,7 +13,7 @@ WALL: StatsLeaf = {
     'render': {
         'layer': Layer.WALL_TOP,
         'asset_path': 'walls.tops',
-        'asset_type': AssetType.TUPLE,
+        'asset_type': AssetType.SEQUENCE,
         'y_offset': 4   # высота текстуры лица стены / 2
     }
 }

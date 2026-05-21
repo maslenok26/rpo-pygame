@@ -1,10 +1,12 @@
 from .shared import Timer
 
 from .base import (
-    BaseSprite, HitboxSprite, Component, ComponentGroup, Body, Entity
+    BaseSprite, WorldSprite, UISprite, HitboxSprite, Component, ComponentGroup,
+    Body, Entity
 )
 
 from .camera import Camera
+from .hud import HPBar
 from .weapon import Weapon
 from .wall import Wall
 from .projectile import Projectile

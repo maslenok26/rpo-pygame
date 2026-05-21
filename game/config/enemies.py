@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from .constants import Layer, AssetType
 from .merger import Tree
 

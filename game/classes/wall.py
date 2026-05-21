@@ -1,4 +1,4 @@
-from . import BaseSprite, HitboxSprite
+from . import HitboxSprite, WorldSprite
 from ..dynamic_assets import generate_obstacle_shadow
 from .. import config as cfg
 
@@ -10,21 +10,21 @@ class Wall(HitboxSprite):
 
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._add_to_groups('obstacles')
+        self._sprite_groups['obstacles'].add(self)
 
         if needs_face:
-            self.face = BaseSprite(
+            self.face = WorldSprite(
                 sprite_groups, assets, self.rect.midbottom, cfg.WALL_FACE
             )
             shadow_stats = (
                 self._get_shadow_stats(generate_obstacle_shadow)
             )
-            self.shadow = BaseSprite(
+            self.shadow = WorldSprite(
                 sprite_groups, assets, self.face.rect.midbottom, shadow_stats
             )
             self.kill = self._kill_with_components
         # стена сдвигается на оффсет. благодаря тому что сдвиг происходит в
-        # конце, лицо и тень стены остаются на нужных местах.
+        # конце, лицо и тень стены остаются на нужных местах
         self.rect.centery -= stats['render']['y_offset']
 
     def _kill_with_components(self):

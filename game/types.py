@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict, NotRequired, Literal
+from typing import TYPE_CHECKING, TypedDict, NotRequired
 
 import pygame as pg
 
@@ -9,21 +9,26 @@ if TYPE_CHECKING:
 
 
 # ТИПЫ ДЛЯ MANAGER.PY
-class SpriteGroups(TypedDict):
-    rendering: pg.sprite.LayeredUpdates[BaseSprite]
+class SpriteGroupsTyped(TypedDict):
+    world_render: pg.sprite.LayeredUpdates[BaseSprite]
     obstacles: pg.sprite.Group[HitboxSprite]
     player: pg.sprite.GroupSingle[Player]
     enemies: pg.sprite.Group[Enemy]
     player_projectiles: pg.sprite.Group[Projectile]
     enemy_projectiles: pg.sprite.Group[Projectile]
     entity_components: pg.sprite.Group[BaseSprite]
+    ui: pg.sprite.Group
+
+type SpriteGroups = SpriteGroupsTyped | dict[str, pg.sprite.AbstractGroup]
+
+type Assets = dict[str, pg.Surface | tuple[pg.Surface, ...]]
 
 
 # ТИПЫ ДЛЯ CONFIG/
 class FactionRule(TypedDict):
     proj_self_group_key: str
     proj_target_group_keys: tuple[str, ...]
-
+    
 
 class GeneralStats(TypedDict):
     # entity
@@ -52,11 +57,13 @@ class PhysicsStats(TypedDict):
     drag: NotRequired[float]
 
 class RenderStats(TypedDict):
-    layer: NotRequired[int]
     asset_path: NotRequired[str]
     asset_type: NotRequired[cfg.AssetType]
+    layer: NotRequired[int]
     # wall
     y_offset: NotRequired[int]
+    anchor: NotRequired[cfg.Anchor]
+    anchor_offset: NotRequired[tuple[int, int]]
 
 class ComponentsStats(TypedDict):
     timers: NotRequired[dict[str, TimerStats]]

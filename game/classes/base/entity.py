@@ -46,12 +46,8 @@ class Entity(Body, ABC):
         return cfg.CollisionAction.STOP
 
     def take_damage(self, amount):
-        self.hp -= amount
-        if self.hp <= 0:
-            self.die()
-    
-    def die(self):
-        self.kill()
+        self.hp = max(self.hp-amount, 0)
+        if self.hp == 0: self.kill()
     
     def _add_weapons(self, WeaponClass: type[Weapon], type_keys):
         self.weapons = []

@@ -18,9 +18,9 @@ class Body(HitboxSprite, ABC):
     def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self.speed = stats['physics']['speed']
+        self.speed = self._physics['speed']
         
-        self.pos = pg.Vector2(*pos)
+        self.pos = pg.Vector2(pos)
         self.move_vec = pg.Vector2()
         self._remainder = pg.Vector2()
 

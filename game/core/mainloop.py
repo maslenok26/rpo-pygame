@@ -7,10 +7,11 @@ def mainloop(gm: GameManager):
     gm.init_level()
 
     fps = gm.get_fps()
+    clock = pg.Clock()
     running = True
 
     while running:
-        dt = gm.clock.tick_busy_loop(fps) / 1000
+        dt = clock.tick_busy_loop(fps) / 1000
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 running = False

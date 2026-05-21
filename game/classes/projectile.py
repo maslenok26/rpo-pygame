@@ -9,7 +9,7 @@ from .. import config as cfg
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from . import HitboxSprite, Entity
-    from ..types import StatsLeaf, FactionRule
+    from ..types import FactionRule
 
 
 class Projectile(Body):
@@ -17,20 +17,16 @@ class Projectile(Body):
     collidables: tuple[HitboxSprite]
 
     def __init__(
-            self, sprite_groups, assets, pos, stats: StatsLeaf,
-            vector: pg.Vector2,
-            faction_rule: FactionRule
+            self, sprite_groups, assets, pos, stats,
+            vector: pg.Vector2, faction_rule: FactionRule
             ):
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._add_to_groups(faction_rule['proj_self_group_key'])
-
-        general = stats['general']
-        physics = stats['physics']
+        self._sprite_groups[faction_rule['proj_self_group_key']].add(self)
         
-        self.damage = general['damage']
-        self.bounces_left = general['bounces_left']
-        self.drag = physics['drag']
+        self.damage = self._general['damage']
+        self.bounces_left = self._general['bounces_left']
+        self.drag = self._physics['drag']
         
         is_inside_obstacle = pg.sprite.spritecollideany(
             self,
@@ -49,7 +45,7 @@ class Projectile(Body):
 
         self._set_image(pg.transform.rotate(self.image, -vector.angle))
         
-        self._init_timers(stats, lifetime=self.kill)
+        self._init_timers(lifetime=self.kill)
         self.timers['lifetime'].start()
     
     def update(self, dt):
@@ -72,5 +68,5 @@ class Projectile(Body):
         if not self.bounces_left:
             return cfg.CollisionAction.KILLSELF
         self.bounces_left -= 1
-        self.image = pg.transform.rotate(self.orig_image, self.move_vec.angle)
+        self.image = pg.transform.rotate(self._orig_image, self.move_vec.angle)
         return cfg.CollisionAction.BOUNCE

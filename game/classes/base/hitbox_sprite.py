@@ -3,22 +3,21 @@ from abc import ABC
 
 import pygame as pg
 
-from .base_sprite import BaseSprite
-
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from ...types import StatsLeaf
+from .world_sprite import WorldSprite
 
 
-class HitboxSprite(BaseSprite, ABC):
-    def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
+class HitboxSprite(WorldSprite, ABC):
+    def __init__(self, sprite_groups, assets, pos, stats):
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self.hitbox = pg.Rect(0, 0, *stats['physics']['hitbox_size'])
+        self._physics = self._stats['physics']
+
+        self.hitbox = pg.Rect(0, 0, *self._physics['hitbox_size'])
         self.hitbox.center = pos
 
     def _check_hitbox_collision(
-            self, sprite: HitboxSprite, collidable: HitboxSprite
+            #  метод для аргумента collided в pg.sprite.spritecollide, поэтому три аргумента
+            self, sprite: HitboxSprite, collidable: HitboxSprite 
             ):
         is_colliding = sprite.hitbox.colliderect(collidable.hitbox)
         return is_colliding

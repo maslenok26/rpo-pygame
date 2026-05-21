@@ -23,7 +23,7 @@ PLAYER: StatsLeaf = {
         },
     'components': {
         'timers': {
-            'dash': {'duration': 150, 'cooldown': 500}
+            'dash': {'duration': 100, 'cooldown': 500}
         },
         'start_weapon_keys': ('revolver', 'shotgun')
     }

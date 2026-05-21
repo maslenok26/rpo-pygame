@@ -18,7 +18,6 @@ FACTION_RULES: dict[str, FactionRule] = {
     }
 }
 
-ASSET_PATH = 'weapons'
 WEAPONS = Tree(
     defaults={
         'general': {
@@ -96,4 +95,4 @@ WEAPONS = Tree(
             }
         }
     }
-).merge_defaults(asset_path=ASSET_PATH)
+).merge_defaults(asset_path='weapons')

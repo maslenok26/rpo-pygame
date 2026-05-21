@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from ..types import StatsLeaf, TreeContent, MergedTree
 
-LEAF_KEYS = set(CfgKey.Leaf)
+LEAF_KEYS = frozenset(CfgKey.Leaf)
 
 class Tree(dict):
     def __init__(
@@ -40,15 +40,15 @@ class Tree(dict):
             value: StatsLeaf | Tree
             if self._is_leaf(value):
                 if no_defaults:
-                    new_leaf = value
+                    merged_leaf = value
                 else:
-                    new_leaf = deepcopy(cur_defaults)
-                    self._deep_update(new_leaf, value)
+                    merged_leaf = deepcopy(cur_defaults)
+                    self._deep_update(merged_leaf, value)
                 if has_assets:
-                    if CfgKey.Leaf.RENDER not in new_leaf:
-                        new_leaf['render'] = {}
-                    new_leaf['render']['asset_path'] = cur_asset_path
-                self[key] = new_leaf
+                    merged_leaf.setdefault(
+                        'render', {}
+                    )['asset_path'] = cur_asset_path
+                self[key] = merged_leaf
             else:
                 value.merge_defaults(cur_defaults, cur_asset_path)
         del self.defaults

@@ -13,6 +13,7 @@ GAME_SURF_CENTER = GAME_SURF_SIZE / 2
 # СМЕНА КАДРОВ
 FPS_LOCK = True
 FPS = 60
+VSYNC = True
 
 # ФИЗИКА
 SUB_STEP_LIMIT = 10
@@ -38,12 +39,25 @@ class Layer(IntEnum):
     PROJECTILE = 9
     WALL_TOP = 10
 
+class Anchor(Enum):
+    TOPLEFT = auto()
+    TOPRIGHT = auto()
+    BOTTOMLEFT = auto()
+    BOTTOMRIGHT = auto()
+
+ANCHORS_NORM_OFFSETS = {
+    Anchor.TOPLEFT: (0, 0),
+    Anchor.TOPRIGHT: (1, 0),
+    Anchor.BOTTOMLEFT: (0, 1),
+    Anchor.BOTTOMRIGHT: (1, 1)
+}
+
 BG_WALL_COLOR = (58, 68, 102)
 
 # ЗАГРУЗКА АССЕТОВ
 class AssetType(Enum):
     SINGLE = auto()
-    TUPLE = auto()
+    SEQUENCE = auto()
 
 ASSET_PATH_SEP = '.'
 
@@ -51,7 +65,7 @@ ASSET_SUFFIX = '.png'
 SEQUENCE_SUFFIX = '.seq'
 
 SHADOW_PREFIX = 'shadow'
-SHADOW_COLOR_RGBA = (0, 0, 0, 100)
+SHADOW_COLOR = (20, 24, 37, 130)
 
 # ГЕНЕРАЦИЯ КАРТЫ
 class GameObject(Enum):
@@ -64,8 +78,8 @@ class GameObject(Enum):
 class CfgKey:
     class Leaf(StrEnum):
         GENERAL = 'general'
-        PHYSICS = 'physics'
         RENDER = 'render'
+        PHYSICS = 'physics'
         COMPONENTS = 'components'
 
     class Render(StrEnum):
