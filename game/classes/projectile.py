@@ -22,24 +22,27 @@ class Projectile(Body):
             ):
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._sprite_groups[faction_rule['proj_self_group_key']].add(self)
-        
-        self.damage = self._general['damage']
-        self.bounces_left = self._general['bounces_left']
-        self.drag = self._physics['drag']
-        
         is_inside_obstacle = pg.sprite.spritecollideany(
             self,
             self._sprite_groups['obstacles'], 
             collided=self._check_hitbox_collision
             )
         if is_inside_obstacle:
-            self.kill()
+            self._register_groups.clear()
             return
+        
+        self._register_groups.append(
+            self._sprite_groups[faction_rule['proj_self_group_key']]
+            )
         self.target_groups = tuple(
             self._sprite_groups[key]
             for key in faction_rule['proj_target_group_keys']
         )
+        
+        self.damage = self._general['damage']
+        self.bounces_left = self._general['bounces_left']
+        self.drag = self._physics['drag']
+
         self._update_collidables()
         self.move_vec.update(vector)
 

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import ABC
 
 import pygame as pg
 
@@ -9,7 +8,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from .entity import Entity
 
-class Component(WorldSprite, ABC):
+
+class Component(WorldSprite):
     owner: Entity
     
     def __init__(self, sprite_groups, assets, stats, owner: Entity):
@@ -17,7 +17,7 @@ class Component(WorldSprite, ABC):
 
         super().__init__(sprite_groups, assets, self.owner.rect.center, stats)
 
-        self._sprite_groups['entity_components'].add(self)
+        self._register_groups.append(self._sprite_groups['entity_components'])
 
     def _sync_with_owner(self):
         self.rect.center = self.owner.rect.center

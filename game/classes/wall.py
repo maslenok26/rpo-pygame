@@ -6,11 +6,11 @@ from .. import config as cfg
 class Wall(HitboxSprite):
     def __init__(self, sprite_groups, assets, pos, depth, needs_face):
         stats = cfg.WALL
-        self.image_idx = depth
+        self._image_idx = depth
 
         super().__init__(sprite_groups, assets, pos, stats)
 
-        self._sprite_groups['obstacles'].add(self)
+        self._register_groups.append(self._sprite_groups['obstacles'])
 
         if needs_face:
             self.face = WorldSprite(

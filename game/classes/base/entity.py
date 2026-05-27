@@ -1,5 +1,4 @@
 from __future__ import annotations
-from abc import ABC
 from random import choice
 
 import pygame as pg
@@ -15,8 +14,7 @@ if TYPE_CHECKING:
     from ...types import StatsLeaf
 
 
-class Entity(Body, ABC):
-    image_flipped = False
+class Entity(Body):
     weapons: list[Weapon]
     weapon: Weapon
 
@@ -30,6 +28,8 @@ class Entity(Body, ABC):
         self.faction = general['faction']
         self.hp = general['hp']
 
+        self.image_flipped = False
+
         self.collidables = self._sprite_groups['obstacles']
         self.look_vec = pg.Vector2(choice(((1, 0), (-1, 0))))
 
@@ -38,9 +38,7 @@ class Entity(Body, ABC):
             sprite_groups, assets, shadow_stats, owner=self
             )
 
-        self._add_weapons(
-            WeaponClass, stats['components']['start_weapon_keys']
-            )
+        self._add_weapons(WeaponClass, self._components['start_weapon_keys'])
         
     def _handle_collision(self, _):
         return cfg.CollisionAction.STOP

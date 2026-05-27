@@ -12,7 +12,7 @@ class Player(Entity):
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._sprite_groups['player'].add(self)
+        self._register_groups.append(self._sprite_groups['player'])
 
         physics = stats['physics']
         

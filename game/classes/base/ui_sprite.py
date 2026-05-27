@@ -8,28 +8,22 @@ from ... import config as cfg
 
 class UISprite(BaseSprite):
     def __init__(self, sprite_groups, assets, stats):
-        
         super().__init__(sprite_groups, assets, stats)
 
+        self._register_groups.append(self._sprite_groups['ui'])
+
+        self._setup_render()
         self.anchor_norm_offset = (
             cfg.ANCHORS_NORM_OFFSETS[self._render['anchor']]
         )
-        self._init_rect()
-        self._sprite_groups['ui'].add(self)
-        
-    def _init_rect(self):
-        super()._init_rect()
-        pos = (
-            cfg.GAME_SURF_SIZE.elementwise()
-            * self.anchor_norm_offset
+        self.rect.topleft = (
+            cfg.GAME_SURF_SIZE.elementwise() * self.anchor_norm_offset
             + self._render.get('anchor_offset', (0, 0))
         )
-        self.rect.topleft = (
-            pos - self._get_image_offset(pg.Vector2(self.image.size))
-        )
+        self._init_images()
 
     def _set_image(self, image):
-        old_size = self.image.size
+        old_size = self.image.size if self.image is not None else (0, 0)
         super()._set_image(image)
         delta = pg.Vector2(self.image.size) - old_size 
         self.rect.center -= self._get_image_offset(delta)

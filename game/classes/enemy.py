@@ -18,7 +18,7 @@ class Enemy(Entity):
 
         super().__init__(sprite_groups, assets, pos, stats, WeaponClass=Weapon)
 
-        self._sprite_groups['enemies'].add(self)
+        self._register_groups.append(self._sprite_groups['enemies'])
 
         general = stats['general']
         

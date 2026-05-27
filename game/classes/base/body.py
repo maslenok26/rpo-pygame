@@ -5,6 +5,7 @@ from math import copysign
 import pygame as pg
 
 from .hitbox_sprite import HitboxSprite
+from .register_metas import RegisterABCMeta
 from ... import config as cfg
 
 from typing import TYPE_CHECKING
@@ -12,7 +13,7 @@ if TYPE_CHECKING:
     from ...types import StatsLeaf
 
 
-class Body(HitboxSprite, ABC):
+class Body(HitboxSprite, ABC, metaclass=RegisterABCMeta):
     collidables: pg.sprite.Group[HitboxSprite] | tuple[HitboxSprite]
     
     def __init__(self, sprite_groups, assets, pos, stats: StatsLeaf):
@@ -56,8 +57,7 @@ class Body(HitboxSprite, ABC):
                 self.hitbox.clip(collidable.hitbox)[2+axis_idx], step
             )
             self.hitbox[axis_idx] -= overlap
-            action = self._handle_collision(collisions)
-            match action:
+            match self._handle_collision(collisions):
                 case cfg.CollisionAction.STOP:
                     steps_to_do[axis_idx] = 0
                     self._remainder[axis_idx] = 0

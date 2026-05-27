@@ -5,20 +5,22 @@ from ... import config as cfg
 
 
 class WorldSprite(BaseSprite):
+    _LAYER_KNOWN = True
+
     def __init__(self, sprite_groups, assets, pos, stats):
         super().__init__(sprite_groups, assets, stats)
 
-        self._init_rect(pos)
-        self._sprite_groups['world_render'].add(self)
+        self.rect.center = pos
 
-    def _setup_render(self):
         if cfg.CfgKey.Leaf.RENDER not in self._stats:
             return
-        super()._setup_render()
+        
+        self._register_groups.append(self._sprite_groups['world_render'])
 
-    def _init_rect(self, pos):
-        super()._init_rect()
-        self.rect.center = pos
+        self._setup_render()
+        self._init_images()
+        if not self._LAYER_KNOWN: return
+        self.layer = self._render['layer']
 
     def _set_image(self, image):
         center = self.rect.center

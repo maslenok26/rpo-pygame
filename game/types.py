@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, TypedDict, NotRequired
+from typing import TYPE_CHECKING, TypedDict, NotRequired, Literal
 
 import pygame as pg
 
@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     from . import config as cfg
 
 
-# ТИПЫ ДЛЯ MANAGER.PY
+# Общие типы
 class SpriteGroupsTyped(TypedDict):
     world_render: pg.sprite.LayeredUpdates[BaseSprite]
     obstacles: pg.sprite.Group[HitboxSprite]
@@ -24,7 +24,7 @@ type SpriteGroups = SpriteGroupsTyped | dict[str, pg.sprite.AbstractGroup]
 type Assets = dict[str, pg.Surface | tuple[pg.Surface, ...]]
 
 
-# ТИПЫ ДЛЯ CONFIG/
+# Типы для config/
 class FactionRule(TypedDict):
     proj_self_group_key: str
     proj_target_group_keys: tuple[str, ...]
